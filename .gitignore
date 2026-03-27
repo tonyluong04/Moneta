@@ -1,0 +1,44 @@
+# === Java / Spring Boot ===
+*.class
+*.jar
+*.war
+*.ear
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# === Gradle (if used) ===
+.gradle/
+build/
+
+# === Node / React ===
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+
+# === IDE ===
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.swp
+*.swo
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Docker ===
+docker-compose.override.yml
+
+# === Logs ===
+*.log
+logs/
+
+# === PostgreSQL data (if mounted locally) ===
+pgdata/
