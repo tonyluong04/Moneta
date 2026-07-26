@@ -22,9 +22,7 @@ dist/
 # === IDE ===
 .idea/
 *.iml
-.vscode/*
-!.vscode/settings.json
-!.vscode/extensions.json
+.vscode/
 *.swp
 *.swo
 
@@ -42,3 +40,8 @@ logs/
 
 # === PostgreSQL data (if mounted locally) ===
 pgdata/
+
+# === Personal planning docs (not part of the repo) ===
+explanation
+plan.md
+Moneta_PRD.md
