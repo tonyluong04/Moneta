@@ -3,6 +3,7 @@ import LoginPage from './pages/LoginPage';
 import PortfolioPage from './pages/PortfolioPage';
 import ProtectedRoute from './components/routing/ProtectedRoute';
 import GuestRoute from './components/routing/GuestRoute';
+import BudgetSetupPage from './pages/BudgetSetupPage';
 
 const router = createBrowserRouter([
   {
@@ -18,6 +19,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <PortfolioPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/budget/setup',
+    element: (
+      <ProtectedRoute>
+        <BudgetSetupPage/>
       </ProtectedRoute>
     ),
   },

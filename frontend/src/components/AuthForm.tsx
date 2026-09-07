@@ -117,12 +117,18 @@ export default function AuthForm({ onSubmit, onDemoLogin }: AuthFormProps) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-sm text-gray-700">Password</Label>
+              <Label htmlFor="password" className="text-sm text-gray-700">
+                Password
+                {mode === 'register' && (
+                  <span className="text-gray-400 font-normal"> — at least 8 characters</span>
+                )}
+              </Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   className="rounded-xl px-4 py-3 pr-11 h-auto border-gray-200 bg-white text-sm"
+                  minLength={mode === 'register' ? 8 : undefined}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

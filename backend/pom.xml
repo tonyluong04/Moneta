@@ -81,10 +81,17 @@
 		</dependency>
 
 		<!-- Flyway -->
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-		</dependency>
+              <dependency>
+                      <groupId>org.springframework.boot</groupId>
+                      <artifactId>spring-boot-flyway</artifactId>
+              </dependency>
+
+              <!-- Flyway 11 requires a per-database module; without it PostgreSQL
+                   is rejected as an unsupported database. -->
+              <dependency>
+                      <groupId>org.flywaydb</groupId>
+                      <artifactId>flyway-database-postgresql</artifactId>
+              </dependency>
 
 		<!-- JWT -->
 		<dependency>
