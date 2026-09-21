@@ -32,6 +32,15 @@ public class Category {
     @Column(length = 7)
     private String colour;
 
+    // true when the amount is the same every month (rent, insurance, subscriptions).
+    // the actuals form pre-fills these from the budgeted amount.
+    @Column(name = "is_fixed", nullable = false)
+    private boolean fixed;
+
+    // the order this category appears in forms and charts, within its type
+    @Column(name = "display_order", nullable = false)
+    private Integer displayOrder;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -43,9 +52,20 @@ public class Category {
         createdAt = LocalDateTime.now();
     }
 
-    // true if this is a shared preset (has no owner)
-    public boolean isPreset() {
-        return user == null;
+    public boolean isFixed() {
+        return fixed;
+    }
+
+    public void setFixed(boolean fixed) {
+        this.fixed = fixed;
+    }
+
+    public Integer getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public void setDisplayOrder(Integer displayOrder) {
+        this.displayOrder = displayOrder;
     }
 
     public Integer getId() {

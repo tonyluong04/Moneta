@@ -1,12 +1,18 @@
 export type CategoryType = 'INCOME' | 'EXPENSE';
 
-/** Mirrors CategoryResponse — what GET /api/v1/categories returns. */
+/**
+ * Mirrors CategoryResponse — what GET /api/v1/categories returns.
+ * Categories are a fixed, seeded set; the API is read-only.
+ */
 export interface Category {
   id: number;
   name: string;
   type: CategoryType;
   colour: string | null;
-  preset: boolean;
+  /** The amount is the same every month — the actuals form pre-fills it. */
+  fixed: boolean;
+  /** Position within its type. The list arrives already sorted by it. */
+  displayOrder: number;
 }
 
 /** Mirrors CategorySummary — the trimmed category nested inside a budget row. */

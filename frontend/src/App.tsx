@@ -3,7 +3,7 @@ import LoginPage from './pages/LoginPage';
 import PortfolioPage from './pages/PortfolioPage';
 import ProtectedRoute from './components/routing/ProtectedRoute';
 import GuestRoute from './components/routing/GuestRoute';
-import BudgetSetupPage from './pages/BudgetSetupPage';
+import BudgetPage from './pages/BudgetPage';
 
 const router = createBrowserRouter([
   {
@@ -23,12 +23,17 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/budget/setup',
+    path: '/budget',
     element: (
       <ProtectedRoute>
-        <BudgetSetupPage/>
+        <BudgetPage />
       </ProtectedRoute>
     ),
+  },
+  {
+    // the plan and the actuals used to be two pages; keep old links working
+    path: '/budget/setup',
+    element: <Navigate to="/budget" replace />,
   },
   {
     path: '*',

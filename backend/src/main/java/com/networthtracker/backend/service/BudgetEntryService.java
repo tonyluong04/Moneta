@@ -52,7 +52,7 @@ public class BudgetEntryService {
         LocalDate month = toFirstOfMonth(request.getMonth());
         //  turn the category ID number into the real Category object,
         //  and verify you're allowed to use it
-        Category category = resolveCategory(user, request.getCategoryId());
+        Category category = resolveCategory(request.getCategoryId());
         if (budgetEntryRepository.existsByUserAndCategoryAndMonth(user, category, month)) {
             throw new IllegalArgumentException(
                     "A budget for that category already exists for this month");
@@ -143,10 +143,10 @@ public class BudgetEntryService {
         return created;
     }
 
-    // convert an incoming categoryId into a Category object,
-    //  while enforcing that you're allowed to use it.
-    private Category resolveCategory(User user, Integer categoryId) {
-        return categoryRepository.findVisibleById(categoryId, user)
+    // convert an incoming categoryId into a Category object.
+    //  categories are a shared, seeded set, so any real id is usable by anyone.
+    private Category resolveCategory(Integer categoryId) {
+        return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
     }
 

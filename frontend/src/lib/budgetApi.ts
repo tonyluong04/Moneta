@@ -6,7 +6,7 @@ import type {
   UpdateBudgetEntryRequest,
 } from '@/types/budget';
 
-/** GET /api/v1/categories — presets plus this user's own, ordered by type then name. */
+/** GET /api/v1/categories — the full seeded set, ordered by type then display order. */
 export function fetchCategories(): Promise<Category[]> {
   return apiFetch<Category[]>('/api/v1/categories');
 }

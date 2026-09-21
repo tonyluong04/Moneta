@@ -3,13 +3,17 @@ package com.networthtracker.backend.dto;
 import com.networthtracker.backend.entity.CategoryType;
 
 // a category as sent back to the frontend.
+// every category is a shared preset, so there is no "preset" flag to report.
 public class CategoryResponse {
 
     private Integer id;
     private String name;
     private CategoryType type;
     private String colour;
-    private boolean preset; // tells the UI to disable delete on presets
+    // the amount is the same every month — the actuals form pre-fills it
+    private boolean fixed;
+    // position within its type; the list arrives already sorted by it
+    private Integer displayOrder;
 
     public CategoryResponse() {}
 
@@ -45,11 +49,19 @@ public class CategoryResponse {
         this.colour = colour;
     }
 
-    public boolean isPreset() {
-        return preset;
+    public boolean isFixed() {
+        return fixed;
     }
 
-    public void setPreset(boolean preset) {
-        this.preset = preset;
+    public void setFixed(boolean fixed) {
+        this.fixed = fixed;
+    }
+
+    public Integer getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public void setDisplayOrder(Integer displayOrder) {
+        this.displayOrder = displayOrder;
     }
 }
