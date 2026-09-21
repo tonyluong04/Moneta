@@ -7,8 +7,8 @@ Moneta is a full-stack personal finance web application that gives users a unifi
 ## Features
 
 - **Authentication** — email/password with JWT access tokens + rotating refresh tokens (HttpOnly cookie), BCrypt password hashing
-- **Categories** — preset income/expense categories seeded at startup, plus user-defined custom categories
-- **Budgeting** — a monthly budget-vs-actual model: set a budget per category per month, fill in actuals later, and copy a plan forward from the previous month
+- **Categories** — a fixed set of 19 income/expense categories seeded by migration, each with a colour, a display order, and an `is_fixed` flag for amounts that repeat every month
+- **Budgeting** — a monthly budget-vs-actual model on one page per month (`/budget?month=YYYY-MM`): budgeted amount, actual amount, and a progress bar per category. Fixed categories pre-fill their actual from the plan, so only the categories that genuinely vary need typing. Plans can be copied forward from the previous month
 - _Planned:_ budget dashboard & charts, asset/liability portfolio, live stock/crypto pricing, net-worth snapshots, multi-currency
 
 ## Tech Stack
@@ -69,6 +69,12 @@ npm run dev
 
 The app runs at `http://localhost:5173`.
 
+A demo account is seeded by migration if you want to skip registering:
+
+```
+demo@moneta.app / demo1234
+```
+
 ## API Overview
 
 Base path: `/api/v1` (auth endpoints are under `/auth`).
@@ -77,8 +83,7 @@ Base path: `/api/v1` (auth endpoints are under `/auth`).
 |--------|----------|-------------|
 | POST | `/auth/register` `/auth/login` `/auth/refresh` | Authentication |
 | GET/PUT | `/api/v1/users/me` | Get / update profile |
-| GET/POST | `/api/v1/categories` | List / create category |
-| DELETE | `/api/v1/categories/{id}` | Delete custom category |
+| GET | `/api/v1/categories` | List all categories (read-only; seeded set) |
 | GET/POST | `/api/v1/budget` | List (by month) / create budget entry |
 | PUT/DELETE | `/api/v1/budget/{id}` | Update / delete budget entry |
 | POST | `/api/v1/budget/copy-forward` | Copy previous month's plan forward |
