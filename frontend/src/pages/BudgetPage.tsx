@@ -4,7 +4,7 @@
  * linkable and survives a refresh.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import MonthSelector from '@/components/budget/MonthSelector';
@@ -20,32 +20,18 @@ import {
   updateBudgetEntry,
 } from '@/lib/budgetApi';
 import { parseAmount } from '@/lib/format';
-import {
-  addMonths,
-  currentMonth,
-  formatMonthLabel,
-  isCurrentMonth,
-  monthElapsed,
-  parseMonthSlug,
-  toMonthParam,
-  toMonthSlug,
-} from '@/lib/month';
+import { addMonths, formatMonthLabel, isCurrentMonth, monthElapsed, toMonthSlug } from '@/lib/month';
+import { useMonthParam } from '@/hooks/useMonthParam';
 import type { BudgetEntry, Category } from '@/types/budget';
 
 export default function BudgetPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  // ?month=2026-03 is the source of truth; anything missing or malformed
-  // falls back to the current month rather than rendering an Invalid Date.
-  const month = parseMonthSlug(searchParams.get('month')) ?? currentMonth();
-  const monthParam = toMonthParam(month); // the API wants 2026-03-01
+  // the shared ?month=YYYY-MM contract, also used by the dashboard
+  const { month, monthParam, setMonth } = useMonthParam();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [entries, setEntries] = useState<BudgetEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  const changeMonth = (next: Date) => setSearchParams({ month: toMonthSlug(next) });
 
   const load = useCallback(async () => {
     const [loadedCategories, loadedEntries] = await Promise.all([
@@ -201,7 +187,7 @@ export default function BudgetPage() {
               Plan what you expect to earn and spend, then fill in the actuals as the month goes.
             </p>
           </div>
-          <MonthSelector month={month} onChange={changeMonth} disabled={loading || saving} />
+          <MonthSelector month={month} onChange={setMonth} disabled={loading || saving} />
         </div>
 
         <div className="flex items-center gap-3 mb-6">
@@ -224,6 +210,10 @@ export default function BudgetPage() {
             className="ml-auto rounded-xl border-teal-200 text-teal-700 hover:bg-teal-50"
           >
             Copy {formatMonthLabel(addMonths(month, -1))}
+          </Button>
+
+          <Button asChild variant="outline" className="rounded-xl border-gray-200">
+            <Link to={`/budget/dashboard?month=${toMonthSlug(month)}`}>View charts</Link>
           </Button>
         </div>
 

@@ -7,9 +7,16 @@ interface MonthSelectorProps {
   month: Date;
   onChange: (month: Date) => void;
   disabled?: boolean;
+  /** false renders bare arrows — for pages that already name the month elsewhere. */
+  showLabel?: boolean;
 }
 
-export default function MonthSelector({ month, onChange, disabled = false }: MonthSelectorProps) {
+export default function MonthSelector({
+  month,
+  onChange,
+  disabled = false,
+  showLabel = true,
+}: MonthSelectorProps) {
   return (
     <div className="flex items-center gap-2">
       <Button
@@ -24,9 +31,11 @@ export default function MonthSelector({ month, onChange, disabled = false }: Mon
         <ChevronLeft className="w-4 h-4" />
       </Button>
 
-      <span className="min-w-40 text-center text-sm font-semibold text-gray-900">
-        {formatMonthLabel(month)}
-      </span>
+      {showLabel && (
+        <span className="min-w-40 text-center text-sm font-semibold text-gray-900">
+          {formatMonthLabel(month)}
+        </span>
+      )}
 
       <Button
         type="button"

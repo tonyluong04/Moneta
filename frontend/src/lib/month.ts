@@ -66,3 +66,12 @@ export function monthElapsed(month: Date): { day: number; daysInMonth: number; p
   const day = new Date().getDate();
   return { day, daysInMonth, percent: Math.round((day / daysInMonth) * 100) };
 }
+
+/**
+ * An API month string ("2026-09-01") as a compact label, e.g. "Sep 2026".
+ * Used by the chart axes and anywhere a month appears in a dense list.
+ */
+export function formatMonthShort(monthIso: string): string {
+  const date = parseMonthSlug(monthIso.slice(0, 7));
+  return date ? date.toLocaleDateString('en-AU', { month: 'short', year: 'numeric' }) : monthIso;
+}

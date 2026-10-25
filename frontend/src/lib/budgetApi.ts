@@ -5,6 +5,7 @@ import type {
   CreateBudgetEntryRequest,
   UpdateBudgetEntryRequest,
 } from '@/types/budget';
+import type { BudgetReport } from '@/types/report';
 
 /** GET /api/v1/categories — the full seeded set, ordered by type then display order. */
 export function fetchCategories(): Promise<Category[]> {
@@ -45,4 +46,9 @@ export function copyForward(month: string): Promise<BudgetEntry[]> {
   return apiFetch<BudgetEntry[]>(`/api/v1/budget/copy-forward?month=${month}`, {
     method: 'POST',
   });
+}
+
+/** GET /api/v1/reports/budget?month=YYYY-MM-01 — all three dashboard charts in one call. */
+export function fetchBudgetReport(month: string): Promise<BudgetReport> {
+  return apiFetch<BudgetReport>(`/api/v1/reports/budget?month=${month}`);
 }

@@ -4,6 +4,7 @@ import PortfolioPage from './pages/PortfolioPage';
 import ProtectedRoute from './components/routing/ProtectedRoute';
 import GuestRoute from './components/routing/GuestRoute';
 import BudgetPage from './pages/BudgetPage';
+import BudgetDashboardPage from './pages/BudgetDashboardPage';
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <BudgetPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/budget/dashboard',
+    element: (
+      <ProtectedRoute>
+        <BudgetDashboardPage />
       </ProtectedRoute>
     ),
   },

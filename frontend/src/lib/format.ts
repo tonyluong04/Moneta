@@ -18,3 +18,15 @@ export function parseAmount(value: string): number {
   const parsed = Number(trimmed);
   return Number.isFinite(parsed) ? parsed : 0;
 }
+/**
+ * Compact currency for chart axis ticks — no cents, because "A$100" reads
+ * instantly on an axis where "A$100.00" is just noise. Tooltips keep the
+ * full-precision formatCurrency.
+ */
+export function formatAxisCurrency(value: number, currency = 'AUD'): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(value);
+}
