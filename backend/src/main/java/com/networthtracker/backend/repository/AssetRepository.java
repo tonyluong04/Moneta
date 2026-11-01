@@ -1,7 +1,6 @@
 package com.networthtracker.backend.repository;
 
 import com.networthtracker.backend.entity.Asset;
-import com.networthtracker.backend.entity.AssetCategory;
 import com.networthtracker.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,7 +25,4 @@ public interface AssetRepository extends JpaRepository<Asset, Integer> {
 
     // by id AND user, so another account's row is simply not found
     Optional<Asset> findByIdAndUser(Integer id, User user);
-
-    // guards category deletion: a category still holding assets cannot be removed
-    long countByCategory(AssetCategory category);
 }

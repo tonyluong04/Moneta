@@ -3,6 +3,7 @@ package com.networthtracker.backend.dto;
 import com.networthtracker.backend.entity.PriceSource;
 
 // a full asset category, as served by GET /assets/categories.
+// every category is a shared preset, so there is no "preset" flag to report.
 public class AssetCategoryResponse {
 
     private Integer id;
@@ -10,7 +11,6 @@ public class AssetCategoryResponse {
     private String description;
     private Integer displayOrder;
     private PriceSource priceSource; // null means valued by hand
-    private boolean preset;          // true for the seeded eight; those cannot be deleted
 
     public AssetCategoryResponse() {}
 
@@ -52,13 +52,5 @@ public class AssetCategoryResponse {
 
     public void setPriceSource(PriceSource priceSource) {
         this.priceSource = priceSource;
-    }
-
-    public boolean isPreset() {
-        return preset;
-    }
-
-    public void setPreset(boolean preset) {
-        this.preset = preset;
     }
 }

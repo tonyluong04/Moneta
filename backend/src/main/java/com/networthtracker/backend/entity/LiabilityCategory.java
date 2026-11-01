@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * A liability category — seven seeded presets plus whatever the user adds.
+ * A liability category — the seven seeded presets, ending in "Other Liability".
  *
  * Same shape as AssetCategory minus two fields: no description, because liabilities
  * render as a plain list rather than subtitled cards, and no price source, because
@@ -19,7 +19,7 @@ public class LiabilityCategory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // null for a preset shared by everyone; set for a user's own category
+    // always null — every category is a preset. See AssetCategory.user
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -38,11 +38,6 @@ public class LiabilityCategory {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-    }
-
-    /** A preset belongs to no one, and nobody may delete or edit it. */
-    public boolean isPreset() {
-        return user == null;
     }
 
     public Integer getId() {

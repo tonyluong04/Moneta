@@ -1,7 +1,6 @@
 package com.networthtracker.backend.repository;
 
 import com.networthtracker.backend.entity.Liability;
-import com.networthtracker.backend.entity.LiabilityCategory;
 import com.networthtracker.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,6 +18,4 @@ public interface LiabilityRepository extends JpaRepository<Liability, Integer> {
     List<Liability> findByUserOrdered(@Param("user") User user);
 
     Optional<Liability> findByIdAndUser(Integer id, User user);
-
-    long countByCategory(LiabilityCategory category);
 }

@@ -5,11 +5,12 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * An asset category — eight seeded presets plus whatever the user adds.
+ * An asset category — the eight seeded presets, ending in "Other assets".
  *
- * Was a java enum in task 4.1. It became a table once categories had to be
- * user-extensible, which is also why display_order is now a real column: the
- * database can order by it, so the services no longer re-sort in java.
+ * Was a java enum in task 4.1. It is a table because the metadata belongs in data:
+ * price_source decides which Phase 5 provider prices the category rather than a
+ * hardcoded name check, and display_order being a real column means the database
+ * orders the lists, so the services no longer re-sort in java.
  */
 @Entity
 @Table(name = "asset_categories")
@@ -19,7 +20,11 @@ public class AssetCategory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // null for a preset shared by everyone; set for a user's own category
+    /**
+     * The owner of this category. Always null today: every category is a preset
+     * shared by every user, exactly as with budget categories. The column is here
+     * so the three category tables share one shape — see V10.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -46,11 +51,6 @@ public class AssetCategory {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-    }
-
-    /** A preset belongs to no one, and nobody may delete or edit it. */
-    public boolean isPreset() {
-        return user == null;
     }
 
     public Integer getId() {

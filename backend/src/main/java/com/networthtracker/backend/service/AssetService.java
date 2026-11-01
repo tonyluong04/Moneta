@@ -46,7 +46,7 @@ public class AssetService {
         Asset asset = new Asset();
         asset.setUser(user);
         asset.setName(request.getName().trim());
-        asset.setCategory(resolveCategory(user, request.getCategoryId()));
+        asset.setCategory(resolveCategory(request.getCategoryId()));
         asset.setManualValue(request.getManualValue());
         if (request.getCurrency() != null) {
             asset.setCurrency(request.getCurrency());
@@ -66,7 +66,7 @@ public class AssetService {
             asset.setName(request.getName().trim());
         }
         if (request.getCategoryId() != null) {
-            asset.setCategory(resolveCategory(user, request.getCategoryId()));
+            asset.setCategory(resolveCategory(request.getCategoryId()));
         }
         if (request.getManualValue() != null) {
             asset.setManualValue(request.getManualValue());
@@ -88,11 +88,11 @@ public class AssetService {
     }
 
     /**
-     * Turn an incoming categoryId into a category, and check the user may use it:
-     * a preset, or one of their own. Someone else's custom category is not found.
+     * Turn an incoming categoryId into a category. No ownership check: the set is
+     * seeded and shared, so any valid id is one this user may file an asset under.
      */
-    private AssetCategory resolveCategory(User user, Integer categoryId) {
-        return assetCategoryRepository.findVisibleById(categoryId, user)
+    private AssetCategory resolveCategory(Integer categoryId) {
+        return assetCategoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
     }
 

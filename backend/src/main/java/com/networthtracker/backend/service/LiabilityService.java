@@ -45,7 +45,7 @@ public class LiabilityService {
         Liability liability = new Liability();
         liability.setUser(user);
         liability.setName(request.getName().trim());
-        liability.setCategory(resolveCategory(user, request.getCategoryId()));
+        liability.setCategory(resolveCategory(request.getCategoryId()));
         liability.setBalance(request.getBalance());
         liability.setInterestRate(request.getInterestRate());
         if (request.getCurrency() != null) {
@@ -66,7 +66,7 @@ public class LiabilityService {
             liability.setName(request.getName().trim());
         }
         if (request.getCategoryId() != null) {
-            liability.setCategory(resolveCategory(user, request.getCategoryId()));
+            liability.setCategory(resolveCategory(request.getCategoryId()));
         }
         if (request.getBalance() != null) {
             liability.setBalance(request.getBalance());
@@ -90,8 +90,9 @@ public class LiabilityService {
         liabilityRepository.delete(requireOwn(user, id));
     }
 
-    private LiabilityCategory resolveCategory(User user, Integer categoryId) {
-        return liabilityCategoryRepository.findVisibleById(categoryId, user)
+    // seeded, shared set — see AssetService.resolveCategory
+    private LiabilityCategory resolveCategory(Integer categoryId) {
+        return liabilityCategoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
     }
 
