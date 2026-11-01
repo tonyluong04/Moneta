@@ -1,7 +1,5 @@
 package com.networthtracker.backend.dto;
 
-import com.networthtracker.backend.entity.LiabilityCategory;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -20,7 +18,7 @@ public class LiabilityResponse {
 
     private Integer id;
     private String name;
-    private LiabilityCategory category; // serialises as its name, e.g. "MORTGAGE"
+    private LiabilityCategorySummary category; // nested id + name
     private String currency;
     private BigDecimal balance;
     private BigDecimal interestRate;
@@ -29,11 +27,6 @@ public class LiabilityResponse {
     private LocalDateTime updatedAt;
 
     public LiabilityResponse() {}
-
-    // derived, no backing field — same trick as AssetResponse
-    public String getCategoryLabel() {
-        return category != null ? category.getLabel() : null;
-    }
 
     public Integer getId() {
         return id;
@@ -51,11 +44,11 @@ public class LiabilityResponse {
         this.name = name;
     }
 
-    public LiabilityCategory getCategory() {
+    public LiabilityCategorySummary getCategory() {
         return category;
     }
 
-    public void setCategory(LiabilityCategory category) {
+    public void setCategory(LiabilityCategorySummary category) {
         this.category = category;
     }
 

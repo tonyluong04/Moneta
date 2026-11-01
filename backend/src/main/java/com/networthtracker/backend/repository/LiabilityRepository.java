@@ -1,18 +1,24 @@
 package com.networthtracker.backend.repository;
 
 import com.networthtracker.backend.entity.Liability;
+import com.networthtracker.backend.entity.LiabilityCategory;
 import com.networthtracker.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
-// database access for liabilities.
 public interface LiabilityRepository extends JpaRepository<Liability, Integer> {
 
-    // everything this user owes, in category order then name
-    List<Liability> findByUserOrderByCategoryAscNameAsc(User user);
+    /** Everything the user owes, mortgages first. Ordered in SQL — see AssetRepository. */
+    @Query("SELECT l FROM Liability l JOIN l.category c "
+            + "WHERE l.user = :user "
+            + "ORDER BY c.displayOrder ASC, l.name ASC")
+    List<Liability> findByUserOrdered(@Param("user") User user);
 
-    // find a row only if it is this user's (used before update/delete for safety)
     Optional<Liability> findByIdAndUser(Integer id, User user);
+
+    long countByCategory(LiabilityCategory category);
 }

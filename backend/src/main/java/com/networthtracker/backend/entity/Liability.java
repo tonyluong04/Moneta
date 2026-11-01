@@ -22,8 +22,9 @@ public class Liability {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
+    // a preset or one of this user's own — see LiabilityCategory
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "liability_category_id")
     private LiabilityCategory category;
 
     @Column(nullable = false, length = 3)

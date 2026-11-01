@@ -1,7 +1,6 @@
 package com.networthtracker.backend.controller;
 
 import com.networthtracker.backend.dto.AssetResponse;
-import com.networthtracker.backend.dto.CategoryOption;
 import com.networthtracker.backend.dto.CreateAssetRequest;
 import com.networthtracker.backend.dto.UpdateAssetRequest;
 import com.networthtracker.backend.entity.User;
@@ -32,13 +31,8 @@ public class AssetController {
         return ResponseEntity.ok(assetService.findAll(user));
     }
 
-    // GET /assets/categories — the 8 categories for the add form and the cards (200 OK).
-    // declared above /{id} for readability; spring matches the literal path first either
-    // way, and "categories" would never convert to an Integer id regardless.
-    @GetMapping("/categories")
-    public ResponseEntity<List<CategoryOption>> getCategories() {
-        return ResponseEntity.ok(assetService.findCategories());
-    }
+    // categories live in AssetCategoryController, at /assets/categories — separate,
+    // the way CategoryController is separate from BudgetController
 
     // GET /assets/{id} — one asset, 400 if it is not this user's (200 OK)
     @GetMapping("/{id}")

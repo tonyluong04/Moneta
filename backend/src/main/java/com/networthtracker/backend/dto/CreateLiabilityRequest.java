@@ -1,6 +1,5 @@
 package com.networthtracker.backend.dto;
 
-import com.networthtracker.backend.entity.LiabilityCategory;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
@@ -17,8 +16,9 @@ public class CreateLiabilityRequest {
     @Size(max = 100, message = "Name must be at most 100 characters")
     private String name;
 
+    // just the id — the service looks up the category and checks you may use it
     @NotNull(message = "Category is required")
-    private LiabilityCategory category;
+    private Integer categoryId;
 
     /**
      * Amount owing, sent positive. A A$410,000 mortgage is 410000.00, not -410000:
@@ -36,7 +36,7 @@ public class CreateLiabilityRequest {
     @Digits(integer = 3, fraction = 2, message = "Interest rate can have at most 2 decimal places")
     private BigDecimal interestRate;
 
-    @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be a 3-letter ISO code such as AUD")
+    @Pattern(regexp = "AUD|USD", message = "Currency must be AUD or USD")
     private String currency;
 
     @Size(max = 500, message = "Notes must be at most 500 characters")
@@ -52,12 +52,12 @@ public class CreateLiabilityRequest {
         this.name = name;
     }
 
-    public LiabilityCategory getCategory() {
-        return category;
+    public Integer getCategoryId() {
+        return categoryId;
     }
 
-    public void setCategory(LiabilityCategory category) {
-        this.category = category;
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 
     public BigDecimal getBalance() {

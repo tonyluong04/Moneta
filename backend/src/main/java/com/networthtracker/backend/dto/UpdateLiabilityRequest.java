@@ -1,6 +1,5 @@
 package com.networthtracker.backend.dto;
 
-import com.networthtracker.backend.entity.LiabilityCategory;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Pattern;
@@ -15,7 +14,7 @@ public class UpdateLiabilityRequest {
     @Size(max = 100, message = "Name must be at most 100 characters")
     private String name;
 
-    private LiabilityCategory category;
+    private Integer categoryId;
 
     @DecimalMin(value = "0.00", message = "Balance cannot be negative")
     @Digits(integer = 13, fraction = 2, message = "Balance can have at most 2 decimal places")
@@ -25,7 +24,7 @@ public class UpdateLiabilityRequest {
     @Digits(integer = 3, fraction = 2, message = "Interest rate can have at most 2 decimal places")
     private BigDecimal interestRate;
 
-    @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be a 3-letter ISO code such as AUD")
+    @Pattern(regexp = "AUD|USD", message = "Currency must be AUD or USD")
     private String currency;
 
     @Size(max = 500, message = "Notes must be at most 500 characters")
@@ -41,12 +40,12 @@ public class UpdateLiabilityRequest {
         this.name = name;
     }
 
-    public LiabilityCategory getCategory() {
-        return category;
+    public Integer getCategoryId() {
+        return categoryId;
     }
 
-    public void setCategory(LiabilityCategory category) {
-        this.category = category;
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 
     public BigDecimal getBalance() {

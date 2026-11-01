@@ -21,9 +21,9 @@ public class Asset {
     @Column(nullable = false, length = 100)
     private String name;
 
-    // stored as the text "CASH"/"SHARES"/..., not a number
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
+    // a preset or one of this user's own — see AssetCategory
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "asset_category_id")
     private AssetCategory category;
 
     @Column(nullable = false, length = 3)

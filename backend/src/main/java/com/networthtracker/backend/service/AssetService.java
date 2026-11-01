@@ -1,58 +1,36 @@
 package com.networthtracker.backend.service;
 
+import com.networthtracker.backend.dto.AssetCategorySummary;
 import com.networthtracker.backend.dto.AssetResponse;
-import com.networthtracker.backend.dto.CategoryOption;
 import com.networthtracker.backend.dto.CreateAssetRequest;
 import com.networthtracker.backend.dto.UpdateAssetRequest;
 import com.networthtracker.backend.entity.Asset;
 import com.networthtracker.backend.entity.AssetCategory;
 import com.networthtracker.backend.entity.User;
+import com.networthtracker.backend.repository.AssetCategoryRepository;
 import com.networthtracker.backend.repository.AssetRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
 public class AssetService {
 
     private final AssetRepository assetRepository;
+    private final AssetCategoryRepository assetCategoryRepository;
 
-    public AssetService(AssetRepository assetRepository) {
+    public AssetService(AssetRepository assetRepository,
+                        AssetCategoryRepository assetCategoryRepository) {
         this.assetRepository = assetRepository;
+        this.assetCategoryRepository = assetCategoryRepository;
     }
 
-    /** The eight categories, for the add form and the overview cards. */
-    public List<CategoryOption> findCategories() {
-        List<CategoryOption> options = new ArrayList<>();
-        for (AssetCategory category : AssetCategory.values()) {
-            CategoryOption option = new CategoryOption();
-            option.setValue(category.name());
-            option.setLabel(category.getLabel());
-            option.setDescription(category.getDescription());
-            option.setDisplayOrder(category.getDisplayOrder());
-            options.add(option);
-        }
-        return options;
-    }
-
-    /** Every asset the user owns, in card order. */
+    /** Every asset the user owns, in card order — ordered by the query, not here. */
     public List<AssetResponse> findAll(User user) {
-        List<Asset> assets = assetRepository.findByUserOrderByCategoryAscNameAsc(user);
-
-        // The database can only order the category column alphabetically ("CASH",
-        // "CRYPTO", "INVESTMENT_PROPERTY"...), which is not the order the cards want.
-        // displayOrder lives on the enum, so the final sort has to happen here.
-        // List.sort is stable, so the name ordering the query produced survives
-        // inside each category and does not need restating.
-        // the (Asset asset) type is spelled out because List.sort takes a
-        // Comparator<? super Asset>, and that wildcard defeats inference
-        assets.sort(Comparator.comparingInt((Asset asset) -> asset.getCategory().getDisplayOrder()));
-
         List<AssetResponse> responses = new ArrayList<>();
-        for (Asset asset : assets) {
+        for (Asset asset : assetRepository.findByUserOrdered(user)) {
             responses.add(toResponse(asset));
         }
         return responses;
@@ -68,7 +46,7 @@ public class AssetService {
         Asset asset = new Asset();
         asset.setUser(user);
         asset.setName(request.getName().trim());
-        asset.setCategory(request.getCategory());
+        asset.setCategory(resolveCategory(user, request.getCategoryId()));
         asset.setManualValue(request.getManualValue());
         if (request.getCurrency() != null) {
             asset.setCurrency(request.getCurrency());
@@ -87,8 +65,8 @@ public class AssetService {
         if (request.getName() != null) {
             asset.setName(request.getName().trim());
         }
-        if (request.getCategory() != null) {
-            asset.setCategory(request.getCategory());
+        if (request.getCategoryId() != null) {
+            asset.setCategory(resolveCategory(user, request.getCategoryId()));
         }
         if (request.getManualValue() != null) {
             asset.setManualValue(request.getManualValue());
@@ -110,6 +88,15 @@ public class AssetService {
     }
 
     /**
+     * Turn an incoming categoryId into a category, and check the user may use it:
+     * a preset, or one of their own. Someone else's custom category is not found.
+     */
+    private AssetCategory resolveCategory(User user, Integer categoryId) {
+        return assetCategoryRepository.findVisibleById(categoryId, user)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+    }
+
+    /**
      * Load by id AND user, so another account's row is simply "not found" rather
      * than forbidden — the same guard the budget rows use.
      */
@@ -119,10 +106,16 @@ public class AssetService {
     }
 
     private AssetResponse toResponse(Asset asset) {
+        AssetCategory category = asset.getCategory();
+
+        AssetCategorySummary categorySummary = new AssetCategorySummary();
+        categorySummary.setId(category.getId());
+        categorySummary.setName(category.getName());
+
         AssetResponse response = new AssetResponse();
         response.setId(asset.getId());
         response.setName(asset.getName());
-        response.setCategory(asset.getCategory());
+        response.setCategory(categorySummary);
         response.setCurrency(asset.getCurrency());
         response.setManualValue(asset.getManualValue());
         // the Phase 5 seam: ask the entity what it is worth, never read manualValue here

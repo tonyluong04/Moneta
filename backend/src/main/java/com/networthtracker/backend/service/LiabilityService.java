@@ -1,53 +1,36 @@
 package com.networthtracker.backend.service;
 
-import com.networthtracker.backend.dto.CategoryOption;
 import com.networthtracker.backend.dto.CreateLiabilityRequest;
+import com.networthtracker.backend.dto.LiabilityCategorySummary;
 import com.networthtracker.backend.dto.LiabilityResponse;
 import com.networthtracker.backend.dto.UpdateLiabilityRequest;
 import com.networthtracker.backend.entity.Liability;
 import com.networthtracker.backend.entity.LiabilityCategory;
 import com.networthtracker.backend.entity.User;
+import com.networthtracker.backend.repository.LiabilityCategoryRepository;
 import com.networthtracker.backend.repository.LiabilityRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
 public class LiabilityService {
 
     private final LiabilityRepository liabilityRepository;
+    private final LiabilityCategoryRepository liabilityCategoryRepository;
 
-    public LiabilityService(LiabilityRepository liabilityRepository) {
+    public LiabilityService(LiabilityRepository liabilityRepository,
+                            LiabilityCategoryRepository liabilityCategoryRepository) {
         this.liabilityRepository = liabilityRepository;
+        this.liabilityCategoryRepository = liabilityCategoryRepository;
     }
 
-    /** The seven categories, for the add form. Description comes back null. */
-    public List<CategoryOption> findCategories() {
-        List<CategoryOption> options = new ArrayList<>();
-        for (LiabilityCategory category : LiabilityCategory.values()) {
-            CategoryOption option = new CategoryOption();
-            option.setValue(category.name());
-            option.setLabel(category.getLabel());
-            option.setDisplayOrder(category.getDisplayOrder());
-            options.add(option);
-        }
-        return options;
-    }
-
-    /** Every liability the user owes, mortgages first. */
+    /** Everything the user owes, mortgages first — ordered by the query. */
     public List<LiabilityResponse> findAll(User user) {
-        List<Liability> liabilities = liabilityRepository.findByUserOrderByCategoryAscNameAsc(user);
-
-        // same reason as AssetService.findAll: the column sorts alphabetically,
-        // displayOrder lives on the enum, and the stable sort keeps names in order
-        liabilities.sort(Comparator.comparingInt(
-                (Liability liability) -> liability.getCategory().getDisplayOrder()));
-
         List<LiabilityResponse> responses = new ArrayList<>();
-        for (Liability liability : liabilities) {
+        for (Liability liability : liabilityRepository.findByUserOrdered(user)) {
             responses.add(toResponse(liability));
         }
         return responses;
@@ -62,7 +45,7 @@ public class LiabilityService {
         Liability liability = new Liability();
         liability.setUser(user);
         liability.setName(request.getName().trim());
-        liability.setCategory(request.getCategory());
+        liability.setCategory(resolveCategory(user, request.getCategoryId()));
         liability.setBalance(request.getBalance());
         liability.setInterestRate(request.getInterestRate());
         if (request.getCurrency() != null) {
@@ -82,8 +65,8 @@ public class LiabilityService {
         if (request.getName() != null) {
             liability.setName(request.getName().trim());
         }
-        if (request.getCategory() != null) {
-            liability.setCategory(request.getCategory());
+        if (request.getCategoryId() != null) {
+            liability.setCategory(resolveCategory(user, request.getCategoryId()));
         }
         if (request.getBalance() != null) {
             liability.setBalance(request.getBalance());
@@ -107,16 +90,27 @@ public class LiabilityService {
         liabilityRepository.delete(requireOwn(user, id));
     }
 
+    private LiabilityCategory resolveCategory(User user, Integer categoryId) {
+        return liabilityCategoryRepository.findVisibleById(categoryId, user)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+    }
+
     private Liability requireOwn(User user, Integer id) {
         return liabilityRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new IllegalArgumentException("Liability not found"));
     }
 
     private LiabilityResponse toResponse(Liability liability) {
+        LiabilityCategory category = liability.getCategory();
+
+        LiabilityCategorySummary categorySummary = new LiabilityCategorySummary();
+        categorySummary.setId(category.getId());
+        categorySummary.setName(category.getName());
+
         LiabilityResponse response = new LiabilityResponse();
         response.setId(liability.getId());
         response.setName(liability.getName());
-        response.setCategory(liability.getCategory());
+        response.setCategory(categorySummary);
         response.setCurrency(liability.getCurrency());
         response.setBalance(liability.getBalance());
         response.setInterestRate(liability.getInterestRate());

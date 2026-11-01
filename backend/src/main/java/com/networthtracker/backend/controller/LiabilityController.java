@@ -1,6 +1,5 @@
 package com.networthtracker.backend.controller;
 
-import com.networthtracker.backend.dto.CategoryOption;
 import com.networthtracker.backend.dto.CreateLiabilityRequest;
 import com.networthtracker.backend.dto.LiabilityResponse;
 import com.networthtracker.backend.dto.UpdateLiabilityRequest;
@@ -34,11 +33,7 @@ public class LiabilityController {
         return ResponseEntity.ok(liabilityService.findAll(user));
     }
 
-    // GET /liabilities/categories — the 7 categories for the add form (200 OK)
-    @GetMapping("/categories")
-    public ResponseEntity<List<CategoryOption>> getCategories() {
-        return ResponseEntity.ok(liabilityService.findCategories());
-    }
+    // categories live in LiabilityCategoryController, at /liabilities/categories
 
     // GET /liabilities/{id} — one liability (200 OK)
     @GetMapping("/{id}")

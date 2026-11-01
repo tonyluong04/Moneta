@@ -1,7 +1,5 @@
 package com.networthtracker.backend.dto;
 
-import com.networthtracker.backend.entity.AssetCategory;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -21,7 +19,7 @@ public class AssetResponse {
 
     private Integer id;
     private String name;
-    private AssetCategory category; // serialises as its name, e.g. "CASH"
+    private AssetCategorySummary category; // nested id + name, like BudgetEntryResponse
     private String currency;
     private BigDecimal manualValue;
     private BigDecimal value;
@@ -30,11 +28,6 @@ public class AssetResponse {
     private LocalDateTime updatedAt;
 
     public AssetResponse() {}
-
-    // derived, no backing field — saves the frontend its own copy of the 8 labels
-    public String getCategoryLabel() {
-        return category != null ? category.getLabel() : null;
-    }
 
     public Integer getId() {
         return id;
@@ -52,11 +45,11 @@ public class AssetResponse {
         this.name = name;
     }
 
-    public AssetCategory getCategory() {
+    public AssetCategorySummary getCategory() {
         return category;
     }
 
-    public void setCategory(AssetCategory category) {
+    public void setCategory(AssetCategorySummary category) {
         this.category = category;
     }
 

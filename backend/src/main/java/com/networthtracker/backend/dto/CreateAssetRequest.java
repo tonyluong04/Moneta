@@ -1,6 +1,5 @@
 package com.networthtracker.backend.dto;
 
-import com.networthtracker.backend.entity.AssetCategory;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
@@ -17,9 +16,9 @@ public class CreateAssetRequest {
     @Size(max = 100, message = "Name must be at most 100 characters")
     private String name;
 
-    // sent as the enum name, e.g. "CASH"; jackson converts it
+    // just the id — the service looks up the category and checks you may use it
     @NotNull(message = "Category is required")
-    private AssetCategory category;
+    private Integer categoryId;
 
     /**
      * Required even though the column is nullable. Today every asset is valued by
@@ -32,7 +31,7 @@ public class CreateAssetRequest {
     @Digits(integer = 13, fraction = 2, message = "Value can have at most 2 decimal places")
     private BigDecimal manualValue;
 
-    @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be a 3-letter ISO code such as AUD")
+    @Pattern(regexp = "AUD|USD", message = "Currency must be AUD or USD")
     private String currency;
 
     @Size(max = 500, message = "Notes must be at most 500 characters")
@@ -48,12 +47,12 @@ public class CreateAssetRequest {
         this.name = name;
     }
 
-    public AssetCategory getCategory() {
-        return category;
+    public Integer getCategoryId() {
+        return categoryId;
     }
 
-    public void setCategory(AssetCategory category) {
-        this.category = category;
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 
     public BigDecimal getManualValue() {

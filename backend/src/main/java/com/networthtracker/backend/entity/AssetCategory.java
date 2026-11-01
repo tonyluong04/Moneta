@@ -1,48 +1,111 @@
 package com.networthtracker.backend.entity;
 
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
 /**
- * The eight asset categories (PRD 4.3.2).
+ * An asset category — eight seeded presets plus whatever the user adds.
  *
- * Label, description and card order live here rather than in a seeded table:
- * the set only changes when this file changes, so a table plus a migration to
- * reword a subtitle would be ceremony for nothing. The API hands these fields
- * to the frontend so the portfolio cards are never hardcoded there.
+ * Was a java enum in task 4.1. It became a table once categories had to be
+ * user-extensible, which is also why display_order is now a real column: the
+ * database can order by it, so the services no longer re-sort in java.
  */
-public enum AssetCategory {
+@Entity
+@Table(name = "asset_categories")
+public class AssetCategory {
 
-    CASH("Cash", "Bank accounts, physical cash", 1),
-    PROPERTY_PPOR("Property - PPOR", "Your primary home", 2),
-    INVESTMENT_PROPERTY("Investment Property", "Rental or investment properties", 3),
-    SHARES("Shares", "Stock market investments", 4),
-    CRYPTO("Crypto", "Digital currency assets", 5),
-    SUPERANNUATION("Super", "Retirement savings accounts", 6),
-    MOTOR_VEHICLES("Motor Vehicles", "Cars, bikes, boats, etc.", 7),
-    OTHER_ASSETS("Other assets", "Valuables, collectibles", 8);
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    private final String label;
-    private final String description;
-    private final int displayOrder;
+    // null for a preset shared by everyone; set for a user's own category
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    AssetCategory(String label, String description, int displayOrder) {
-        this.label = label;
-        this.description = description;
-        this.displayOrder = displayOrder;
+    @Column(nullable = false, length = 100)
+    private String name;
+
+    @Column(length = 255)
+    private String description;
+
+    @Column(name = "display_order", nullable = false)
+    private Integer displayOrder;
+
+    // null means valued by hand — see PriceSource
+    @Enumerated(EnumType.STRING)
+    @Column(name = "price_source", length = 10)
+    private PriceSource priceSource;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    public AssetCategory() {}
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
     }
 
-    public String getLabel() {
-        return label;
+    /** A preset belongs to no one, and nobody may delete or edit it. */
+    public boolean isPreset() {
+        return user == null;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public int getDisplayOrder() {
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getDisplayOrder() {
         return displayOrder;
     }
 
-    // true for the two categories Phase 5 will price from an API rather than by hand
-    public boolean isLivePriced() {
-        return this == SHARES || this == CRYPTO;
+    public void setDisplayOrder(Integer displayOrder) {
+        this.displayOrder = displayOrder;
+    }
+
+    public PriceSource getPriceSource() {
+        return priceSource;
+    }
+
+    public void setPriceSource(PriceSource priceSource) {
+        this.priceSource = priceSource;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }
