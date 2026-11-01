@@ -76,6 +76,12 @@ export async function apiFetch<T = unknown>(
         const error = await retry.json().catch(() => ({ error: 'Request failed' }));
         throw new ApiError(retry.status, error.error ?? 'Request failed');
       }
+
+      // Same 204 guard as the non-retry path below. Without it a DELETE whose token
+      // happened to expire mid-flight succeeds on the server and then throws here,
+      // because there is no body to parse.
+      if (retry.status === 204) return undefined as T;
+
       return retry.json() as Promise<T>;
     }
 

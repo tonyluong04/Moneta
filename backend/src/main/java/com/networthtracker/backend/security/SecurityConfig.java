@@ -1,12 +1,14 @@
 package com.networthtracker.backend.security;
 
 import jakarta.servlet.DispatcherType;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,6 +44,24 @@ public class SecurityConfig {
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/auth/**").permitAll() // login/register are public
                         .anyRequest().authenticated())           // everything else needs a token
+                /*
+                 * Answer "no usable token" with 401, not spring's default 403.
+                 *
+                 * JwtAuthenticationFilter deliberately swallows an invalid or expired
+                 * token and lets the request continue unauthenticated, so without this
+                 * every such request came back 403 with spring's own error body. The
+                 * frontend only attempts its silent refresh on a 401, which meant the
+                 * refresh could never fire and a 15-minute-old token surfaced to the
+                 * user as a bare "Forbidden" instead of renewing itself.
+                 *
+                 * 403 stays for authenticated-but-not-allowed, which is what it means.
+                 */
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.getWriter().write("{\"error\":\"Authentication required\"}");
+                        }))
                 // run our JWT filter before spring's default login filter
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class);
