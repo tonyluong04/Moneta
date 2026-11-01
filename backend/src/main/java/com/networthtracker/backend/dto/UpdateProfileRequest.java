@@ -13,6 +13,9 @@ public class UpdateProfileRequest {
     @Email(message = "Email must be valid")
     private String email;
 
+    // AUD or USD, matching the CHECK on users.preferred_currency (V3). Nothing
+    // converts between currencies until Phase 7 (7.1 FX rates, 7.3 the picker), so
+    // these widen together with that constraint, not before it.
     @Pattern(regexp = "AUD|USD", message = "Currency must be AUD or USD")
     private String preferredCurrency;
 

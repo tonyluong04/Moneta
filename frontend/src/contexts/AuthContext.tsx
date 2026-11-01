@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import type { AuthUser, AuthResponse, LoginRequest, RegisterRequest } from '@/types/auth';
-import { apiFetch, setAccessToken, setAuthCallbacks } from '@/lib/api';
+import { setAccessToken, setAuthCallbacks } from '@/lib/api';
+import * as authApi from '@/lib/authApi';
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -41,9 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function silentRefresh() {
       try {
-        const res = await apiFetch<AuthResponse>('/auth/refresh', {
-          method: 'POST',
-        });
+        const res = await authApi.refresh();
         if (!cancelled) applyAuth(res);
       } catch {
         // No valid refresh cookie — user is not logged in
@@ -57,19 +56,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [applyAuth]);
 
   const login = useCallback(async (data: LoginRequest) => {
-    const res = await apiFetch<AuthResponse>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-    applyAuth(res);
+    applyAuth(await authApi.login(data));
   }, [applyAuth]);
 
   const register = useCallback(async (data: RegisterRequest) => {
-    const res = await apiFetch<AuthResponse>('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-    applyAuth(res);
+    applyAuth(await authApi.register(data));
   }, [applyAuth]);
 
   const logout = useCallback(() => {

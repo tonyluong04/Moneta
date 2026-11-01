@@ -19,7 +19,7 @@ public class UpdateBudgetEntryRequest {
     @Digits(integer = 13, fraction = 2, message = "Amount can have at most 2 decimal places")
     private BigDecimal actualAmount;
 
-    @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be a 3-letter ISO code such as AUD")
+    @Pattern(regexp = "AUD|USD", message = "Currency must be AUD or USD")
     private String currency;
 
     @Size(max = 500, message = "Notes must be at most 500 characters")

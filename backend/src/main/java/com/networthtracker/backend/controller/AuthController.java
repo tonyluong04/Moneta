@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
-import java.util.Map;
 
 // the public auth endpoints (no login needed to reach these).
 @RestController
@@ -48,13 +47,6 @@ public class AuthController {
             @CookieValue(name = REFRESH_COOKIE_NAME, required = false) String refreshToken) {
         AuthResult result = authService.refresh(refreshToken);
         return buildAuthResponse(result);
-    }
-
-    // turn a bad-input exception into a clean 400 response
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleBadRequest(IllegalArgumentException ex) {
-        return ResponseEntity.badRequest()
-                .body(Map.of("error", ex.getMessage()));
     }
 
     // access token goes in the JSON body; refresh token goes in an HttpOnly cookie

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 // the /budget endpoints (login required).
 @RestController
@@ -76,10 +75,4 @@ public class BudgetController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // turn a bad-input exception into a clean 400 response
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleBadRequest(IllegalArgumentException ex) {
-        return ResponseEntity.badRequest()
-                .body(Map.of("error", ex.getMessage()));
-    }
 }

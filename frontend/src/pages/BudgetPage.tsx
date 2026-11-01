@@ -33,44 +33,45 @@ export default function BudgetPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const load = useCallback(async () => {
-    const [loadedCategories, loadedEntries] = await Promise.all([
-      fetchCategories(),
-      fetchBudget(monthParam),
-    ]);
-    setCategories(loadedCategories);
-    setEntries(loadedEntries);
-  }, [monthParam]);
-
-  // Reload whenever the month in the URL changes.
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadForMonth() {
+  /**
+   * The only place that fetches this month's data.
+   *
+   * `shouldApply` lets the caller drop a response it no longer wants — the effect
+   * below passes a closure over its `cancelled` flag so switching months mid-flight
+   * can't write stale rows, while save and copy-forward just call `load()` and
+   * always apply. Previously this existed twice, and only the effect's copy had
+   * error handling.
+   */
+  const load = useCallback(
+    async (shouldApply: () => boolean = () => true) => {
       setLoading(true);
       try {
         const [loadedCategories, loadedEntries] = await Promise.all([
           fetchCategories(),
           fetchBudget(monthParam),
         ]);
-        if (!cancelled) {
-          setCategories(loadedCategories);
-          setEntries(loadedEntries);
-        }
+        if (!shouldApply()) return;
+        setCategories(loadedCategories);
+        setEntries(loadedEntries);
       } catch (error) {
-        if (!cancelled) {
+        if (shouldApply()) {
           toast.error(error instanceof Error ? error.message : 'Could not load the budget');
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (shouldApply()) setLoading(false);
       }
-    }
+    },
+    [monthParam],
+  );
 
-    loadForMonth();
+  // Reload whenever the month in the URL changes.
+  useEffect(() => {
+    let cancelled = false;
+    load(() => !cancelled);
     return () => {
       cancelled = true;
     };
-  }, [monthParam]);
+  }, [load]);
 
   /**
    * One row per category, in the order the API sent them (type, then display_order).
