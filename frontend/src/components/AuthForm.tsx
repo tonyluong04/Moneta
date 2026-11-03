@@ -1,18 +1,33 @@
 import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { paths } from '@/routes/paths';
 
-type AuthMode = 'login' | 'register';
+export type AuthMode = 'login' | 'register';
 
+export interface AuthFormValues {
+  name?: string;
+  email: string;
+  password: string;
+}
+
+/**
+ * The sign-in and sign-up form. The mode comes from the route (/login or
+ * /register) rather than local state, so each form has its own linkable URL.
+ */
 interface AuthFormProps {
-  onSubmit?: (data: { name?: string; email: string; password: string; mode: AuthMode }) => Promise<void>;
+  mode: AuthMode;
+  onSubmit: (data: AuthFormValues) => Promise<void>;
+  /** Shown only when provided — the login page passes it, register doesn't. */
   onDemoLogin?: () => Promise<void>;
 }
 
-export default function AuthForm({ onSubmit, onDemoLogin }: AuthFormProps) {
-  const [mode, setMode] = useState<AuthMode>('login');
+export default function AuthForm({ mode, onSubmit, onDemoLogin }: AuthFormProps) {
+  // carry the "return to" page across when switching between the two forms
+  const location = useLocation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,7 +40,7 @@ export default function AuthForm({ onSubmit, onDemoLogin }: AuthFormProps) {
     setError('');
     setLoading(true);
     try {
-      await onSubmit?.({ name: mode === 'register' ? name : undefined, email, password, mode });
+      await onSubmit({ name: mode === 'register' ? name : undefined, email, password });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     } finally {
@@ -161,14 +176,14 @@ export default function AuthForm({ onSubmit, onDemoLogin }: AuthFormProps) {
             </Button>
           </form>
 
-          {mode === 'login' && (
+          {onDemoLogin && (
             <Button
               variant="outline"
               onClick={async () => {
                 setError('');
                 setLoading(true);
                 try {
-                  await onDemoLogin?.();
+                  await onDemoLogin();
                 } catch (err) {
                   setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
                 } finally {
@@ -184,12 +199,14 @@ export default function AuthForm({ onSubmit, onDemoLogin }: AuthFormProps) {
 
           <p className="text-center text-sm text-gray-500 mt-6">
             {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-            <button
-              onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); }}
-              className="text-teal-600 hover:underline font-semibold cursor-pointer"
+            <Link
+              to={mode === 'login' ? paths.register : paths.login}
+              state={location.state}
+              replace
+              className="text-teal-600 hover:underline font-semibold"
             >
               {mode === 'login' ? 'Sign up' : 'Sign in'}
-            </button>
+            </Link>
           </p>
         </div>
       </div>

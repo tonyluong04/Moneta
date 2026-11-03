@@ -9,7 +9,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -63,8 +63,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     applyAuth(await authApi.register(data));
   }, [applyAuth]);
 
-  const logout = useCallback(() => {
-    clearAuth();
+  const logout = useCallback(async () => {
+    try {
+      // revoke the refresh cookie server-side, or a reload signs straight back in
+      await authApi.logout();
+    } catch {
+      // still sign out locally — a network blip shouldn't leave you stuck signed in
+    } finally {
+      clearAuth();
+    }
   }, [clearAuth]);
 
   return (

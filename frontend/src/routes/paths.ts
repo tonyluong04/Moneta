@@ -10,6 +10,7 @@ import { toMonthSlug } from '@/lib/month';
  */
 export const paths = {
   login: '/login',
+  register: '/register',
   portfolio: '/portfolio',
 
   /** The budget table, optionally pinned to a month. */

@@ -32,3 +32,11 @@ export function register(body: RegisterRequest): Promise<AuthResponse> {
 export function refresh(): Promise<AuthResponse> {
   return apiFetch<AuthResponse>('/auth/refresh', { method: 'POST' });
 }
+
+/**
+ * POST /auth/logout — revokes the refresh token and clears the cookie (204).
+ * Without it, signing out left the cookie behind and a reload signed you back in.
+ */
+export function logout(): Promise<void> {
+  return apiFetch<void>('/auth/logout', { method: 'POST' });
+}

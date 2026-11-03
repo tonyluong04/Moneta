@@ -49,18 +49,38 @@ public class AuthController {
         return buildAuthResponse(result);
     }
 
+    // POST /auth/logout — revoke the refresh token and tell the browser to drop the cookie.
+    // Without this, signing out only cleared client state and a reload signed you back in.
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @CookieValue(name = REFRESH_COOKIE_NAME, required = false) String refreshToken) {
+        authService.logout(refreshToken);
+
+        // same name and path as the real cookie, empty value, Max-Age=0 = delete it
+        ResponseCookie cleared = refreshCookie("", Duration.ZERO);
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, cleared.toString())
+                .build();
+    }
+
     // access token goes in the JSON body; refresh token goes in an HttpOnly cookie
     private ResponseEntity<AuthResponse> buildAuthResponse(AuthResult result) {
-        ResponseCookie cookie = ResponseCookie.from(REFRESH_COOKIE_NAME, result.refreshToken())
-                .httpOnly(true) // JavaScript can't read it — protects it from theft
-                .secure(false) // TODO: set to true in production
-                .path("/auth")
-                .maxAge(REFRESH_COOKIE_MAX_AGE)
-                .sameSite("Lax")
-                .build();
+        ResponseCookie cookie = refreshCookie(result.refreshToken(), REFRESH_COOKIE_MAX_AGE);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(result.response());
+    }
+
+    // one definition of the cookie's attributes, so setting and clearing it can't drift apart
+    // (a browser only deletes a cookie whose name and path match the one it holds)
+    private ResponseCookie refreshCookie(String value, Duration maxAge) {
+        return ResponseCookie.from(REFRESH_COOKIE_NAME, value)
+                .httpOnly(true) // JavaScript can't read it — protects it from theft
+                .secure(false) // TODO: set to true in production
+                .path("/auth")
+                .maxAge(maxAge)
+                .sameSite("Lax")
+                .build();
     }
 }

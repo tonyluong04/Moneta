@@ -1,20 +1,17 @@
-import AuthForm from '@/components/AuthForm';
+import AuthForm, { type AuthFormValues } from '@/components/AuthForm';
 import { useAuth } from '@/contexts/AuthContext';
 
+/** /login. Where you go after signing in is GuestOnly's job, not this page's. */
 export default function LoginPage() {
-  const { login, register } = useAuth();
+  const { login } = useAuth();
 
-  const handleSubmit = async (data: { name?: string; email: string; password: string; mode: string }) => {
-    if (data.mode === 'register') {
-      await register({ username: data.name!, email: data.email, password: data.password });
-    } else {
-      await login({ email: data.email, password: data.password });
-    }
+  const handleSubmit = async ({ email, password }: AuthFormValues) => {
+    await login({ email, password });
   };
 
   const handleDemoLogin = async () => {
     await login({ email: 'demo@moneta.app', password: 'demo1234' });
   };
 
-  return <AuthForm onSubmit={handleSubmit} onDemoLogin={handleDemoLogin} />;
+  return <AuthForm mode="login" onSubmit={handleSubmit} onDemoLogin={handleDemoLogin} />;
 }

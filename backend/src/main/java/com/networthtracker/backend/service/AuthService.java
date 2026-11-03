@@ -98,6 +98,18 @@ public class AuthService {
         return generateTokens(user);
     }
 
+    // sign out: revoke the refresh token this browser holds, so the cookie can't
+    // silently sign it back in. Idempotent — a missing or unknown token is
+    // already "signed out", so it isn't an error.
+    @Transactional
+    public void logout(String refreshTokenValue) {
+        if (refreshTokenValue == null || refreshTokenValue.isBlank()) {
+            return;
+        }
+        refreshTokenRepository.findByToken(refreshTokenValue)
+                .ifPresent(refreshTokenRepository::delete);
+    }
+
     // make a new access token + a new refresh token row for the user
     private AuthResult generateTokens(User user) {
         String accessToken = jwtService.generateAccessToken(user);

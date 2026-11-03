@@ -28,7 +28,10 @@ export const router = createBrowserRouter([
 
       {
         element: <GuestOnly />,
-        children: [{ path: 'login', lazy: page(() => import('@/pages/auth/LoginPage')) }],
+        children: [
+          { path: 'login', lazy: page(() => import('@/pages/auth/LoginPage')) },
+          { path: 'register', lazy: page(() => import('@/pages/auth/RegisterPage')) },
+        ],
       },
 
       {
