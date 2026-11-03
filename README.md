@@ -6,10 +6,13 @@ Moneta is a full-stack personal finance web application that gives users a unifi
 
 ## Features
 
-- **Authentication** — email/password with JWT access tokens + rotating refresh tokens (HttpOnly cookie), BCrypt password hashing
+- **Authentication** — email/password with JWT access tokens + rotating refresh tokens (HttpOnly cookie), BCrypt password hashing. Sign out revokes the refresh token server-side. Separate `/login` and `/register` pages, a one-click demo account, and a signed-out deep link returns you to the page you asked for after signing in
+- **App shell** — a top bar (Portfolio, Budget, Stocks placeholder) with sign out; pages are lazy-loaded so the charting library only downloads with the charts
 - **Categories** — a fixed set of 19 income/expense categories seeded by migration, each with a colour, a display order, and an `is_fixed` flag for amounts that repeat every month
 - **Budgeting** — a monthly budget-vs-actual model on one page per month (`/budget?month=YYYY-MM`): budgeted amount, actual amount, and a progress bar per category. Fixed categories pre-fill their actual from the plan, so only the categories that genuinely vary need typing. Plans can be copied forward from the previous month
-- _Planned:_ budget dashboard & charts, asset/liability portfolio, live stock/crypto pricing, net-worth snapshots, multi-currency
+- **Budget dashboard** — `/budget/dashboard?month=YYYY-MM`: budgeted-vs-actual expense bars and an expense breakdown pie for the selected month, plus a money saved/lost line across every month
+- **Assets & liabilities (API)** — CRUD for assets and liabilities against fixed, seeded category sets (8 asset, 7 liability). The portfolio page itself is still a placeholder
+- _Planned:_ portfolio summary + overview page, live stock/crypto pricing, net-worth snapshots, multi-currency
 
 ## Tech Stack
 
@@ -81,9 +84,16 @@ Base path: `/api/v1` (auth endpoints are under `/auth`).
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/auth/register` `/auth/login` `/auth/refresh` | Authentication |
+| POST | `/auth/register` `/auth/login` `/auth/refresh` `/auth/logout` | Authentication |
 | GET/PUT | `/api/v1/users/me` | Get / update profile |
-| GET | `/api/v1/categories` | List all categories (read-only; seeded set) |
+| GET | `/api/v1/categories` | List budget categories (read-only; seeded set) |
 | GET/POST | `/api/v1/budget` | List (by month) / create budget entry |
 | PUT/DELETE | `/api/v1/budget/{id}` | Update / delete budget entry |
 | POST | `/api/v1/budget/copy-forward` | Copy previous month's plan forward |
+| GET | `/api/v1/reports/budget` | Budget dashboard data for a month |
+| GET/POST | `/api/v1/assets` | List / create asset |
+| GET/PUT/DELETE | `/api/v1/assets/{id}` | Get / update / delete asset |
+| GET | `/api/v1/assets/categories` | List asset categories (read-only; seeded set) |
+| GET/POST | `/api/v1/liabilities` | List / create liability |
+| GET/PUT/DELETE | `/api/v1/liabilities/{id}` | Get / update / delete liability |
+| GET | `/api/v1/liabilities/categories` | List liability categories (read-only; seeded set) |

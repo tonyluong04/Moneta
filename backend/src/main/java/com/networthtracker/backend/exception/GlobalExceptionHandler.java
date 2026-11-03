@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(Map.of("error", message));
     }
 
-    // fallback for any controller that doesn't declare its own handler
+    // the one place a service's IllegalArgumentException becomes a 400 — no controller has its own handler
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleBadRequest(IllegalArgumentException ex) {
         String message = ex.getMessage() != null ? ex.getMessage() : "Invalid request";
