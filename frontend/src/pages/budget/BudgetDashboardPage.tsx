@@ -18,7 +18,8 @@ import BudgetVsActualChart from '@/components/budget/charts/BudgetVsActualChart'
 import NetMoneyChart from '@/components/budget/charts/NetMoneyChart';
 import ExpenseBreakdownChart from '@/components/budget/charts/ExpenseBreakdownChart';
 import { fetchBudgetReport } from '@/lib/budgetApi';
-import { formatMonthLabel, toMonthSlug } from '@/lib/month';
+import { formatMonthLabel } from '@/lib/month';
+import { paths } from '@/routes/paths';
 import { useMonthParam } from '@/hooks/useMonthParam';
 import { cn } from '@/lib/utils';
 import type { BudgetReport } from '@/types/report';
@@ -108,70 +109,68 @@ export default function BudgetDashboardPage() {
   const totalActualExpenses = expenses.reduce((sum, expense) => sum + expense.actual, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Budget dashboard</h1>
-            <p className="text-sm text-gray-500">
-              How the plan compared with what actually happened.
-            </p>
-          </div>
-
-          {/* bare arrows — the calendar block below is what names the month */}
-          <MonthSelector
-            month={month}
-            onChange={setMonth}
-            disabled={loading}
-            showLabel={false}
-          />
+    <>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">Budget dashboard</h1>
+          <p className="text-sm text-gray-500">
+            How the plan compared with what actually happened.
+          </p>
         </div>
 
-        <div className="flex items-center gap-3 mb-6">
-          <Button asChild variant="ghost" className="px-0 text-teal-700 hover:bg-transparent">
-            {/* carry the month across so the two views stay in step */}
-            <Link to={`/budget?month=${toMonthSlug(month)}`}>← Edit this month</Link>
-          </Button>
+        {/* bare arrows — the calendar block below is what names the month */}
+        <MonthSelector
+          month={month}
+          onChange={setMonth}
+          disabled={loading}
+          showLabel={false}
+        />
+      </div>
+
+      <div className="flex items-center gap-3 mb-6">
+        <Button asChild variant="ghost" className="px-0 text-teal-700 hover:bg-transparent">
+          {/* carry the month across so the two views stay in step */}
+          <Link to={paths.budget(month)}>← Edit this month</Link>
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
+          Loading…
         </div>
+      ) : (
+        <div className="space-y-6">
+          {/* ---- Row 1: calendar | Expense Breakdown (pie lands here in 3.5) ---- */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <MonthCard month={month} />
 
-        {loading ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
-            Loading…
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* ---- Row 1: calendar | Expense Breakdown (pie lands here in 3.5) ---- */}
-            <div className="grid gap-6 md:grid-cols-2">
-              <MonthCard month={month} />
-
-              <Section title="Expense Breakdown" subtitle="Actual spending by category">
-                {totalActualExpenses === 0 ? (
-                  <Empty>No spending recorded for {formatMonthLabel(month)}.</Empty>
-                ) : (
-                  <ExpenseBreakdownChart expenses={expenses} />
-                )}
-              </Section>
-            </div>
-
-            {/* ---- Row 2: Budgeted vs Actual Expenses ---- */}
-            <Section title="Budgeted vs Actual Expenses" subtitle={formatMonthLabel(month)}>
-              {expenses.length === 0 ? (
-                <Empty>No expenses budgeted for {formatMonthLabel(month)}.</Empty>
+            <Section title="Expense Breakdown" subtitle="Actual spending by category">
+              {totalActualExpenses === 0 ? (
+                <Empty>No spending recorded for {formatMonthLabel(month)}.</Empty>
               ) : (
-                <BudgetVsActualChart expenses={expenses} />
+                <ExpenseBreakdownChart expenses={expenses} />
               )}
             </Section>
-
-            {/* ---- Row 3: Monthly Money Saved / Lost ---- */}
-            <Section
-              title="Monthly Money Saved / Lost"
-              subtitle="Actual income − actual expenses, every month with data"
-            >
-              <NetMoneyChart netMoney={netMoney} selectedMonth={report?.month} />
-            </Section>
           </div>
-        )}
-      </div>
-    </div>
+
+          {/* ---- Row 2: Budgeted vs Actual Expenses ---- */}
+          <Section title="Budgeted vs Actual Expenses" subtitle={formatMonthLabel(month)}>
+            {expenses.length === 0 ? (
+              <Empty>No expenses budgeted for {formatMonthLabel(month)}.</Empty>
+            ) : (
+              <BudgetVsActualChart expenses={expenses} />
+            )}
+          </Section>
+
+          {/* ---- Row 3: Monthly Money Saved / Lost ---- */}
+          <Section
+            title="Monthly Money Saved / Lost"
+            subtitle="Actual income − actual expenses, every month with data"
+          >
+            <NetMoneyChart netMoney={netMoney} selectedMonth={report?.month} />
+          </Section>
+        </div>
+      )}
+    </>
   );
 }

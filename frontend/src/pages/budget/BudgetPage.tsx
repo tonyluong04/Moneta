@@ -20,7 +20,8 @@ import {
   updateBudgetEntry,
 } from '@/lib/budgetApi';
 import { parseAmount } from '@/lib/format';
-import { addMonths, formatMonthLabel, isCurrentMonth, monthElapsed, toMonthSlug } from '@/lib/month';
+import { addMonths, formatMonthLabel, isCurrentMonth, monthElapsed } from '@/lib/month';
+import { paths } from '@/routes/paths';
 import { useMonthParam } from '@/hooks/useMonthParam';
 import type { BudgetEntry, Category } from '@/types/budget';
 
@@ -179,66 +180,60 @@ export default function BudgetPage() {
   const elapsed = monthElapsed(month);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Budget</h1>
-            <p className="text-sm text-gray-500">
-              Plan what you expect to earn and spend, then fill in the actuals as the month goes.
-            </p>
-          </div>
-          <MonthSelector month={month} onChange={setMonth} disabled={loading || saving} />
+    <>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">Budget</h1>
+          <p className="text-sm text-gray-500">
+            Plan what you expect to earn and spend, then fill in the actuals as the month goes.
+          </p>
         </div>
-
-        <div className="flex items-center gap-3 mb-6">
-          <Button asChild variant="ghost" className="px-0 text-teal-700 hover:bg-transparent">
-            <Link to="/portfolio">← Back to portfolio</Link>
-          </Button>
-
-          {/* Pace indicator — only meaningful for the month we are living in. */}
-          {isCurrentMonth(month) && (
-            <span className="text-xs text-gray-500">
-              Day {elapsed.day} of {elapsed.daysInMonth} — {elapsed.percent}% elapsed
-            </span>
-          )}
-
-          <Button
-            type="button"
-            variant="outline"
-            disabled={loading || saving}
-            onClick={handleCopyForward}
-            className="ml-auto rounded-xl border-teal-200 text-teal-700 hover:bg-teal-50"
-          >
-            Copy {formatMonthLabel(addMonths(month, -1))}
-          </Button>
-
-          <Button asChild variant="outline" className="rounded-xl border-gray-200">
-            <Link to={`/budget/dashboard?month=${toMonthSlug(month)}`}>View charts</Link>
-          </Button>
-        </div>
-
-        {loading ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
-            Loading…
-          </div>
-        ) : (
-          <>
-            {entries.length === 0 && (
-              <div className="bg-teal-50 border border-teal-200 text-teal-800 rounded-xl px-4 py-3 text-sm mb-6">
-                No budget set for {formatMonthLabel(month)} yet — copy last month, or fill in the
-                amounts below and save.
-              </div>
-            )}
-            <BudgetTable
-              categories={categories}
-              rows={rows}
-              saving={saving}
-              onSave={handleSave}
-            />
-          </>
-        )}
+        <MonthSelector month={month} onChange={setMonth} disabled={loading || saving} />
       </div>
-    </div>
+
+      <div className="flex items-center gap-3 mb-6">
+        {/* Pace indicator — only meaningful for the month we are living in. */}
+        {isCurrentMonth(month) && (
+          <span className="text-xs text-gray-500">
+            Day {elapsed.day} of {elapsed.daysInMonth} — {elapsed.percent}% elapsed
+          </span>
+        )}
+
+        <Button
+          type="button"
+          variant="outline"
+          disabled={loading || saving}
+          onClick={handleCopyForward}
+          className="ml-auto rounded-xl border-teal-200 text-teal-700 hover:bg-teal-50"
+        >
+          Copy {formatMonthLabel(addMonths(month, -1))}
+        </Button>
+
+        <Button asChild variant="outline" className="rounded-xl border-gray-200">
+          <Link to={paths.budgetDashboard(month)}>View charts</Link>
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
+          Loading…
+        </div>
+      ) : (
+        <>
+          {entries.length === 0 && (
+            <div className="bg-teal-50 border border-teal-200 text-teal-800 rounded-xl px-4 py-3 text-sm mb-6">
+              No budget set for {formatMonthLabel(month)} yet — copy last month, or fill in the
+              amounts below and save.
+            </div>
+          )}
+          <BudgetTable
+            categories={categories}
+            rows={rows}
+            saving={saving}
+            onSave={handleSave}
+          />
+        </>
+      )}
+    </>
   );
 }
