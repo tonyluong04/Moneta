@@ -2,13 +2,15 @@ package com.networthtracker.backend.dto;
 
 import java.math.BigDecimal;
 
-// one asset's category total, for one card on the portfolio overview
+// one asset category's total across all its assets — one card on the portfolio overview
 public class AssetCategoryTotal {
-    
+
     private Integer categoryId;
     private String name;
     private String description; // the card subtitle
-    private BigDecimal total;  
+    private BigDecimal total;
+
+    public AssetCategoryTotal() {}
 
     public AssetCategoryTotal(Integer categoryId, String name,
                               String description, BigDecimal total) {
