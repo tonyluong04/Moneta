@@ -48,3 +48,11 @@ Moneta_PRD.md
 
 # === Design reference screenshots (not part of the repo) ===
 UI inspiration/
+
+# === Agent specs & tickets (personal planning, like plan.md) ===
+.scratch/
+
+# === Agent skills & project docs (personal tooling and planning) ===
+.claude/
+docs/
+skills-lock.json
