@@ -54,7 +54,7 @@ export default function NetWorthHero({ summary }: NetWorthHeroProps) {
   const maxMagnitude = Math.max(Math.abs(totalAssets), Math.abs(totalLiabilities), Math.abs(netWorth));
 
   return (
-    <section className="rounded-2xl bg-linear-to-br from-teal-700 to-teal-500 px-6 py-10 text-white">
+    <section className="rounded-2xl bg-linear-to-br from-teal-700 to-teal-500 px-10 py-10 text-white">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-light">Portfolio</h1>
         <p className="mt-1 text-sm text-teal-50">A complete view of your wealth</p>

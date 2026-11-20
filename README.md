@@ -1,6 +1,6 @@
 # Moneta — Personal Finance & Wealth Management App
 
-Moneta is a full-stack personal finance web application that gives users a unified view of their financial life — combining lightweight monthly budgeting with long-term wealth tracking. Users plan and track monthly budgets (budgeted vs actual), manage assets and liabilities, track a live stock portfolio, and visualise their financial health over time.
+Moneta is a full-stack personal finance web application that gives users a unified view of their financial life — combining lightweight monthly budgeting with long-term wealth tracking. Users plan and track monthly budgets (budgeted vs actual), manage assets and liabilities, track live-priced share and crypto holdings, and visualise their financial health over time.
 
 > Personal project, work in progress.
 
@@ -12,7 +12,7 @@ Moneta is a full-stack personal finance web application that gives users a unifi
 - **Budgeting** — a monthly budget-vs-actual model on one page per month (`/budget?month=YYYY-MM`): budgeted amount, actual amount, and a progress bar per category. Fixed categories pre-fill their actual from the plan, so only the categories that genuinely vary need typing. Plans can be copied forward from the previous month
 - **Budget dashboard** — `/budget/dashboard?month=YYYY-MM`: budgeted-vs-actual expense bars and an expense breakdown pie for the selected month, plus a money saved/lost line across every month
 - **Assets & liabilities (API)** — CRUD for assets and liabilities against fixed, seeded category sets (8 asset, 7 liability). The portfolio page itself is still a placeholder
-- _Planned:_ portfolio summary + overview page, live stock/crypto pricing, net-worth snapshots, multi-currency
+- _Planned:_ portfolio summary + overview page, live stock/crypto pricing with a holdings page each for Shares and Crypto, net-worth snapshots, multi-currency
 
 ## Tech Stack
 
