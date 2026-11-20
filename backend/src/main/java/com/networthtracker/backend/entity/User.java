@@ -87,6 +87,15 @@ public class User {
         this.preferredCurrency = preferredCurrency;
     }
 
+    /**
+     * The currency a new asset, liability or budget row is stored in: the one the
+     * request asked for, else this user's preferred one — never a hardcoded AUD.
+     * Create only; an update without a currency keeps the row's own.
+     */
+    public String currencyOrPreferred(String requested) {
+        return requested != null ? requested : preferredCurrency;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }

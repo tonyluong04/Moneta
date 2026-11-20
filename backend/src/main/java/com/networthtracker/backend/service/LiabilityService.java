@@ -48,9 +48,7 @@ public class LiabilityService {
         liability.setCategory(resolveCategory(request.getCategoryId()));
         liability.setBalance(request.getBalance());
         liability.setInterestRate(request.getInterestRate());
-        if (request.getCurrency() != null) {
-            liability.setCurrency(request.getCurrency());
-        }
+        liability.setCurrency(user.currencyOrPreferred(request.getCurrency()));
         liability.setNotes(request.getNotes());
 
         liability = liabilityRepository.save(liability);

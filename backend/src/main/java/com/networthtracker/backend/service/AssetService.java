@@ -48,9 +48,7 @@ public class AssetService {
         asset.setName(request.getName().trim());
         asset.setCategory(resolveCategory(request.getCategoryId()));
         asset.setManualValue(request.getManualValue());
-        if (request.getCurrency() != null) {
-            asset.setCurrency(request.getCurrency());
-        }
+        asset.setCurrency(user.currencyOrPreferred(request.getCurrency()));
         asset.setNotes(request.getNotes());
 
         asset = assetRepository.save(asset);

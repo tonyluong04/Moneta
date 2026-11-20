@@ -27,7 +27,9 @@ public class Asset {
     private AssetCategory category;
 
     @Column(nullable = false, length = 3)
-    private String currency = "AUD";
+    // no default: the service sets it on create, from the request or the user's
+    // preferred currency, so a row never silently becomes AUD
+    private String currency;
 
     @Column(columnDefinition = "TEXT")
     private String notes;

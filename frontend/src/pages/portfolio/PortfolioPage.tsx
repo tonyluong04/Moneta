@@ -1,21 +1,28 @@
 /**
  * The signed-in home page, at /portfolio (PRD §4.3.1): the net worth hero, then
- * one card per asset category with its share of total assets as a ring.
+ * one card per asset category with its share of total assets as a ring, then the
+ * panel that adds, edits and deletes assets and liabilities.
  *
  * One request feeds both. Every amount is formatted with the currency the
  * response carries, not the profile's, so the label always matches the numbers.
  * The net-worth-over-time line arrives with snapshots in Phase 6.
+ *
+ * Every change in the manage panel bumps `reloadKey`, which refetches the summary
+ * so the hero and rings follow along. Only the first load shows "Loading…".
  */
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import NetWorthHero from '@/components/portfolio/NetWorthHero';
 import CategoryCard from '@/components/portfolio/CategoryCard';
+import ManagePanel from '@/components/portfolio/manage/ManagePanel';
 import { fetchPortfolioSummary } from '@/lib/portfolioApi';
 import type { PortfolioSummary } from '@/types/portfolio';
 
 export default function PortfolioPage() {
   const [summary, setSummary] = useState<PortfolioSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
+  const reload = useCallback(() => setReloadKey((key) => key + 1), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -37,7 +44,7 @@ export default function PortfolioPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadKey]);
 
   if (loading) {
     return (
@@ -70,6 +77,8 @@ export default function PortfolioPage() {
           />
         ))}
       </div>
+
+      <ManagePanel currency={summary.currency} onChanged={reload} />
     </div>
   );
 }

@@ -67,9 +67,7 @@ public class BudgetEntryService {
         if (request.getActualAmount() != null) {
             entry.setActualAmount(request.getActualAmount());
         }
-        if (request.getCurrency() != null) {
-            entry.setCurrency(request.getCurrency());
-        }
+        entry.setCurrency(user.currencyOrPreferred(request.getCurrency()));
         entry.setNotes(request.getNotes());
 
         entry = budgetEntryRepository.save(entry); // write to database
