@@ -3,11 +3,24 @@
  * PRD §8: always show the currency alongside the value.
  * The 'en-US' locale renders AUD as "A$1,250.00" and USD as "$1,250.00",
  * which matches the PRD examples; 'en-AU' would drop the "A" prefix.
+ *
+ * `wholeUnits` drops the minor unit for glance views like the portfolio hero
+ * ("A$12,001" rather than "A$12,000.50"). Without it each currency keeps its own
+ * minor unit, so JPY and VND never show decimals either way.
+ *
+ * `signDisplay: 'negative'` keeps a zero from printing as "-A$0": an empty
+ * liabilities row negated to -0, or a net worth of -0.40 rounded to whole units.
  */
-export function formatCurrency(value: number, currency = 'AUD'): string {
+export function formatCurrency(
+  value: number,
+  currency = 'AUD',
+  options: { wholeUnits?: boolean } = {},
+): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
+    signDisplay: 'negative',
+    ...(options.wholeUnits && { minimumFractionDigits: 0, maximumFractionDigits: 0 }),
   }).format(value);
 }
 
@@ -24,9 +37,5 @@ export function parseAmount(value: string): number {
  * full-precision formatCurrency.
  */
 export function formatAxisCurrency(value: number, currency = 'AUD'): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(value);
+  return formatCurrency(value, currency, { wholeUnits: true });
 }
