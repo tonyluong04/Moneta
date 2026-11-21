@@ -1,7 +1,7 @@
 package com.networthtracker.backend.dto;
 
+import com.networthtracker.backend.validation.DisplayCurrency;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 // profile edit — every field is optional, only the ones sent get applied.
@@ -13,10 +13,9 @@ public class UpdateProfileRequest {
     @Email(message = "Email must be valid")
     private String email;
 
-    // AUD or USD, matching the CHECK on users.preferred_currency (V3). Nothing
-    // converts between currencies until Phase 7 (7.1 FX rates, 7.3 the picker), so
-    // these widen together with that constraint, not before it.
-    @Pattern(regexp = "AUD|USD", message = "Currency must be AUD or USD")
+    // one of the configured display currencies (moneta.currencies.display); the
+    // CHECK on users.preferred_currency was dropped in V12 so the list rules alone
+    @DisplayCurrency
     private String preferredCurrency;
 
     // needed to authorise a password change

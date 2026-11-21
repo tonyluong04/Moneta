@@ -1,10 +1,10 @@
 package com.networthtracker.backend.dto;
 
+import com.networthtracker.backend.validation.SupportedCurrency;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
@@ -36,7 +36,7 @@ public class CreateLiabilityRequest {
     @Digits(integer = 3, fraction = 2, message = "Interest rate can have at most 2 decimal places")
     private BigDecimal interestRate;
 
-    @Pattern(regexp = "AUD|USD", message = "Currency must be AUD or USD")
+    @SupportedCurrency
     private String currency;
 
     @Size(max = 500, message = "Notes must be at most 500 characters")
