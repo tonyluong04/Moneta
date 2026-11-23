@@ -23,6 +23,10 @@ public class AssetResponse {
     private String currency;
     private BigDecimal manualValue;
     private BigDecimal value;
+    // `value` converted to the user's preferred currency and rounded to its minor
+    // unit — what lists show first, with the native `value` beside it
+    private BigDecimal displayValue;
+    private String displayCurrency;
     private String notes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -75,6 +79,22 @@ public class AssetResponse {
 
     public void setValue(BigDecimal value) {
         this.value = value;
+    }
+
+    public BigDecimal getDisplayValue() {
+        return displayValue;
+    }
+
+    public void setDisplayValue(BigDecimal displayValue) {
+        this.displayValue = displayValue;
+    }
+
+    public String getDisplayCurrency() {
+        return displayCurrency;
+    }
+
+    public void setDisplayCurrency(String displayCurrency) {
+        this.displayCurrency = displayCurrency;
     }
 
     public String getNotes() {

@@ -26,6 +26,10 @@ export interface Asset {
   manualValue: number;
   /** What the asset is worth now: manualValue until live pricing exists. */
   value: number;
+  /** `value` converted to the user's preferred currency, rounded to its minor unit. */
+  displayValue: number;
+  /** The user's preferred currency — what displayValue is in. */
+  displayCurrency: string;
   notes: string | null;
   createdAt: string;
   updatedAt: string;

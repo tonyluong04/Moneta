@@ -22,6 +22,10 @@ public class LiabilityResponse {
     private String currency;
     private BigDecimal balance;
     private BigDecimal interestRate;
+    // `balance` converted to the user's preferred currency and rounded to its minor
+    // unit; named to pair with `balance`, as AssetResponse.displayValue pairs with `value`
+    private BigDecimal displayBalance;
+    private String displayCurrency;
     private String notes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -74,6 +78,22 @@ public class LiabilityResponse {
 
     public void setInterestRate(BigDecimal interestRate) {
         this.interestRate = interestRate;
+    }
+
+    public BigDecimal getDisplayBalance() {
+        return displayBalance;
+    }
+
+    public void setDisplayBalance(BigDecimal displayBalance) {
+        this.displayBalance = displayBalance;
+    }
+
+    public String getDisplayCurrency() {
+        return displayCurrency;
+    }
+
+    public void setDisplayCurrency(String displayCurrency) {
+        this.displayCurrency = displayCurrency;
     }
 
     public String getNotes() {

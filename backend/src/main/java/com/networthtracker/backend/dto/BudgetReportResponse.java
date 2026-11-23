@@ -9,6 +9,9 @@ public class BudgetReportResponse {
     // echoed back so the client can tell which month a response belongs to
     private LocalDate month;
 
+    // the user's preferred currency; every amount below is converted into it
+    private String currency;
+
     // selected month, expense categories only — bar chart and pie
     private List<ExpenseComparison> expenses;
 
@@ -23,6 +26,14 @@ public class BudgetReportResponse {
 
     public void setMonth(LocalDate month) {
         this.month = month;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     public List<ExpenseComparison> getExpenses() {

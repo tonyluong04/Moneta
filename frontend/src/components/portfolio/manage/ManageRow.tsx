@@ -6,8 +6,13 @@ interface ManageRowProps {
   name: string;
   /** Category, plus anything else worth a glance (e.g. the interest rate). */
   detail: string;
-  /** Already formatted, sign included. */
+  /** Already formatted, sign included — in the user's preferred currency. */
   amount: string;
+  /**
+   * The row's own native amount, formatted, shown beside `amount` (PRD §4.5.5).
+   * Only passed when the row is held in a different currency from the one shown.
+   */
+  nativeAmount?: string;
   negative?: boolean;
   /** The row currently loaded into the form above. */
   isBeingEdited: boolean;
@@ -20,6 +25,7 @@ export default function ManageRow({
   name,
   detail,
   amount,
+  nativeAmount,
   negative = false,
   isBeingEdited,
   onEdit,
@@ -36,13 +42,15 @@ export default function ManageRow({
         <p className="truncate text-sm font-medium text-gray-900">{name}</p>
         <p className="truncate text-xs text-gray-500">{detail}</p>
       </div>
-      <span
-        className={cn(
-          'text-sm font-medium tabular-nums',
-          negative ? 'text-red-600' : 'text-gray-900',
+      <span className="text-right tabular-nums">
+        <span
+          className={cn('text-sm font-medium', negative ? 'text-red-600' : 'text-gray-900')}
+        >
+          {amount}
+        </span>
+        {nativeAmount && (
+          <span className="block text-xs text-gray-500 sm:ml-1.5 sm:inline">({nativeAmount})</span>
         )}
-      >
-        {amount}
       </span>
       <div className="flex shrink-0">
         <Button variant="ghost" size="icon" onClick={onEdit} aria-label={`Edit ${name}`}>

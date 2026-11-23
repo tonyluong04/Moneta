@@ -237,7 +237,12 @@ export default function AssetManager({ currency, onChanged }: AssetManagerProps)
               key={asset.id}
               name={asset.name}
               detail={asset.category.name}
-              amount={formatCurrency(asset.value, asset.currency)}
+              amount={formatCurrency(asset.displayValue, asset.displayCurrency)}
+              nativeAmount={
+                asset.currency !== asset.displayCurrency
+                  ? formatCurrency(asset.value, asset.currency)
+                  : undefined
+              }
               isBeingEdited={editing?.id === asset.id}
               onEdit={() => startEdit(asset)}
               onDelete={() => setPendingDelete(asset)}

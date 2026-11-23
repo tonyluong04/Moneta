@@ -1,6 +1,5 @@
 package com.networthtracker.backend.repository;
 
-import com.networthtracker.backend.dto.MonthTypeTotal;
 import com.networthtracker.backend.entity.BudgetEntry;
 import com.networthtracker.backend.entity.Category;
 import com.networthtracker.backend.entity.User;
@@ -25,16 +24,13 @@ public interface BudgetEntryRepository extends JpaRepository<BudgetEntry, Intege
     boolean existsByUserAndCategoryAndMonth(User user, Category category, LocalDate month);
 
     /**
-     * Actual totals per month per category type, across every month this user has data for.
-     * Powers the money saved/lost line — at most two rows per month, so it stays small
-     * however long the user has been budgeting.
-     *
-     * The AS aliases must match MonthTypeTotal getter names.
+     * Every row this user has, oldest month first, with its category loaded in the
+     * same query. Powers the money saved/lost line. Rows are summed in java, not
+     * SQL: each one may be in a different currency and must be converted before it
+     * is added (PRD §4.5.1).
      */
-    @Query("SELECT b.month AS month, c.type AS type, SUM(b.actualAmount) AS total "
-            + "FROM BudgetEntry b JOIN b.category c "
+    @Query("SELECT b FROM BudgetEntry b JOIN FETCH b.category "
             + "WHERE b.user = :user "
-            + "GROUP BY b.month, c.type "
             + "ORDER BY b.month ASC")
-    List<MonthTypeTotal> sumActualByMonthAndType(@Param("user") User user);
+    List<BudgetEntry> findByUserWithCategoryOrderByMonth(@Param("user") User user);
 }

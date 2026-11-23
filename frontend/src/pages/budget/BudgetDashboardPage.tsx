@@ -138,6 +138,11 @@ export default function BudgetDashboardPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
           Loading…
         </div>
+      ) : !report ? (
+        // the load failed (a toast says why); with no report there is no currency to draw in
+        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
+          Could not load the report.
+        </div>
       ) : (
         <div className="space-y-6">
           {/* ---- Row 1: calendar | Expense Breakdown (pie lands here in 3.5) ---- */}
@@ -148,7 +153,7 @@ export default function BudgetDashboardPage() {
               {totalActualExpenses === 0 ? (
                 <Empty>No spending recorded for {formatMonthLabel(month)}.</Empty>
               ) : (
-                <ExpenseBreakdownChart expenses={expenses} />
+                <ExpenseBreakdownChart expenses={expenses} currency={report.currency} />
               )}
             </Section>
           </div>
@@ -158,7 +163,7 @@ export default function BudgetDashboardPage() {
             {expenses.length === 0 ? (
               <Empty>No expenses budgeted for {formatMonthLabel(month)}.</Empty>
             ) : (
-              <BudgetVsActualChart expenses={expenses} />
+              <BudgetVsActualChart expenses={expenses} currency={report.currency} />
             )}
           </Section>
 
@@ -167,7 +172,7 @@ export default function BudgetDashboardPage() {
             title="Monthly Money Saved / Lost"
             subtitle="Actual income − actual expenses, every month with data"
           >
-            <NetMoneyChart netMoney={netMoney} selectedMonth={report?.month} />
+            <NetMoneyChart netMoney={netMoney} currency={report.currency} selectedMonth={report.month} />
           </Section>
         </div>
       )}

@@ -22,6 +22,10 @@ export interface Liability {
   balance: number;
   /** Annual percentage, e.g. 6.24. Null when not given. */
   interestRate: number | null;
+  /** `balance` converted to the user's preferred currency, rounded to its minor unit. Positive. */
+  displayBalance: number;
+  /** The user's preferred currency — what displayBalance is in. */
+  displayCurrency: string;
   notes: string | null;
   createdAt: string;
   updatedAt: string;

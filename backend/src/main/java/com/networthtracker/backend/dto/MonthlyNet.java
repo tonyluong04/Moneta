@@ -10,16 +10,15 @@ public class MonthlyNet {
     private LocalDate month;
     private BigDecimal income = BigDecimal.ZERO;
     private BigDecimal expenses = BigDecimal.ZERO;
+    // income − expenses: positive means money saved, negative means lost. set by the
+    // service from the unrounded sums and rounded once, so it is not derived here
+    // from the already-rounded income and expenses
+    private BigDecimal net = BigDecimal.ZERO;
 
     public MonthlyNet() {}
 
     public MonthlyNet(LocalDate month) {
         this.month = month;
-    }
-
-    // derived, never stored — positive means money saved, negative means lost
-    public BigDecimal getNet() {
-        return income.subtract(expenses);
     }
 
     public LocalDate getMonth() {
@@ -44,5 +43,13 @@ public class MonthlyNet {
 
     public void setExpenses(BigDecimal expenses) {
         this.expenses = expenses;
+    }
+
+    public BigDecimal getNet() {
+        return net;
+    }
+
+    public void setNet(BigDecimal net) {
+        this.net = net;
     }
 }

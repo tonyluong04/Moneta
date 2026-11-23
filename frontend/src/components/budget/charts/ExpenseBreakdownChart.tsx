@@ -14,9 +14,10 @@ interface SliceTooltipProps {
   active?: boolean;
   payload?: Array<{ payload: Slice }>;
   total: number;
+  currency: string;
 }
 
-function SliceTooltip({ active, payload, total }: SliceTooltipProps) {
+function SliceTooltip({ active, payload, total, currency }: SliceTooltipProps) {
   const slice = payload?.[0]?.payload;
   if (!active || !slice) return null;
 
@@ -24,7 +25,7 @@ function SliceTooltip({ active, payload, total }: SliceTooltipProps) {
     <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs shadow-md">
       <p className="font-semibold text-gray-900">{slice.name}</p>
       <p className="mt-0.5 text-gray-600 tabular-nums">
-        {formatCurrency(slice.value)} · {Math.round((slice.value / total) * 100)}%
+        {formatCurrency(slice.value, currency)} · {Math.round((slice.value / total) * 100)}%
       </p>
     </div>
   );
@@ -41,7 +42,13 @@ function SliceTooltip({ active, payload, total }: SliceTooltipProps) {
  * Donut rather than solid pie so the total has somewhere to live; the hole also
  * makes the angles easier to judge.
  */
-export default function ExpenseBreakdownChart({ expenses }: { expenses: ExpenseComparison[] }) {
+interface ExpenseBreakdownChartProps {
+  expenses: ExpenseComparison[];
+  /** The report's currency — every amount in it is already converted to this. */
+  currency: string;
+}
+
+export default function ExpenseBreakdownChart({ expenses, currency }: ExpenseBreakdownChartProps) {
   const slices = useMemo<Slice[]>(() => {
     const ranked = expenses
       .filter((expense) => expense.actual > 0)
@@ -93,7 +100,7 @@ export default function ExpenseBreakdownChart({ expenses }: { expenses: ExpenseC
                 <Cell key={slice.name} fill={slice.colour} />
               ))}
             </Pie>
-            <Tooltip content={<SliceTooltip total={total} />} />
+            <Tooltip content={<SliceTooltip total={total} currency={currency} />} />
           </PieChart>
         </ResponsiveContainer>
 
@@ -101,7 +108,7 @@ export default function ExpenseBreakdownChart({ expenses }: { expenses: ExpenseC
             pointer-events-none so it never swallows a slice hover. */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
           <p className="text-lg font-semibold text-gray-900 tabular-nums">
-            {formatCurrency(total)}
+            {formatCurrency(total, currency)}
           </p>
           <p className="text-[11px] uppercase tracking-wide text-gray-400">spent</p>
         </div>
@@ -117,7 +124,7 @@ export default function ExpenseBreakdownChart({ expenses }: { expenses: ExpenseC
               style={{ backgroundColor: slice.colour }}
             />
             <span className="flex-1 text-gray-700 truncate">{slice.name}</span>
-            <span className="text-gray-800 tabular-nums">{formatCurrency(slice.value)}</span>
+            <span className="text-gray-800 tabular-nums">{formatCurrency(slice.value, currency)}</span>
             <span className="w-10 text-right text-gray-400 tabular-nums">
               {Math.round((slice.value / total) * 100)}%
             </span>

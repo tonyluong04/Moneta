@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.Currency;
 
 /**
  * The only code that applies an exchange rate (PRD §4.5.1). Services call it;
@@ -53,6 +54,25 @@ public class CurrencyConverter {
                 .or(fxRateRepository::findOldestRateDate)
                 .orElseThrow(CurrencyConverter::noRatesStored);
         return convertWithSet(amount, from, to, setDate);
+    }
+
+    /**
+     * Round a final figure to the currency's own minor unit (2 for AUD, 0 for JPY),
+     * HALF_EVEN. Call it once, on the figure that is shown — a row's display value
+     * or a total — never on the parts a total is summed from (PRD §4.5.3).
+     */
+    public BigDecimal round(BigDecimal amount, String currency) {
+        int digits = Math.max(Currency.getInstance(currency).getDefaultFractionDigits(), 0);
+        return amount.setScale(digits, RoundingMode.HALF_EVEN);
+    }
+
+    /**
+     * Convert one amount at the newest rates and round it — for a figure that is
+     * shown on its own, like one row's display value. Never sum these: a total is
+     * built from {@link #convert} results and rounded once at the end.
+     */
+    public BigDecimal convertAndRound(BigDecimal amount, String from, String to) {
+        return round(convert(amount, from, to), to);
     }
 
     private BigDecimal convertWithSet(BigDecimal amount, String from, String to, LocalDate setDate) {

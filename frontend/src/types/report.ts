@@ -19,6 +19,8 @@ export interface MonthlyNet {
 export interface BudgetReport {
   /** Echoed back by the API so we can tell which month a response belongs to. */
   month: string;
+  /** The user's preferred currency; every amount below is converted into it at the latest rates. */
+  currency: string;
   /** Selected month, expense categories only, in display order. */
   expenses: ExpenseComparison[];
   /** A continuous run of months, oldest first. Months with no data are zero-filled. */

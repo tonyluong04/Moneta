@@ -20,24 +20,27 @@ public class LiabilityService {
 
     private final LiabilityRepository liabilityRepository;
     private final LiabilityCategoryRepository liabilityCategoryRepository;
+    private final CurrencyConverter currencyConverter;
 
     public LiabilityService(LiabilityRepository liabilityRepository,
-                            LiabilityCategoryRepository liabilityCategoryRepository) {
+                            LiabilityCategoryRepository liabilityCategoryRepository,
+                            CurrencyConverter currencyConverter) {
         this.liabilityRepository = liabilityRepository;
         this.liabilityCategoryRepository = liabilityCategoryRepository;
+        this.currencyConverter = currencyConverter;
     }
 
     /** Everything the user owes, mortgages first — ordered by the query. */
     public List<LiabilityResponse> findAll(User user) {
         List<LiabilityResponse> responses = new ArrayList<>();
         for (Liability liability : liabilityRepository.findByUserOrdered(user)) {
-            responses.add(toResponse(liability));
+            responses.add(toResponse(liability, user));
         }
         return responses;
     }
 
     public LiabilityResponse findOne(User user, Integer id) {
-        return toResponse(requireOwn(user, id));
+        return toResponse(requireOwn(user, id), user);
     }
 
     @Transactional
@@ -52,7 +55,7 @@ public class LiabilityService {
         liability.setNotes(request.getNotes());
 
         liability = liabilityRepository.save(liability);
-        return toResponse(liability);
+        return toResponse(liability, user);
     }
 
     /** Partial update — paying down a loan is a PUT carrying only the new balance. */
@@ -80,7 +83,7 @@ public class LiabilityService {
         }
 
         liability = liabilityRepository.save(liability);
-        return toResponse(liability);
+        return toResponse(liability, user);
     }
 
     @Transactional
@@ -99,7 +102,9 @@ public class LiabilityService {
                 .orElseThrow(() -> new IllegalArgumentException("Liability not found"));
     }
 
-    private LiabilityResponse toResponse(Liability liability) {
+    // native balance untouched; displayBalance converted and rounded once — see AssetService.toResponse
+    private LiabilityResponse toResponse(Liability liability, User user) {
+        String target = user.getPreferredCurrency();
         LiabilityCategory category = liability.getCategory();
 
         LiabilityCategorySummary categorySummary = new LiabilityCategorySummary();
@@ -112,6 +117,9 @@ public class LiabilityService {
         response.setCategory(categorySummary);
         response.setCurrency(liability.getCurrency());
         response.setBalance(liability.getBalance());
+        response.setDisplayBalance(currencyConverter.convertAndRound(
+                liability.getBalance(), liability.getCurrency(), target));
+        response.setDisplayCurrency(target);
         response.setInterestRate(liability.getInterestRate());
         response.setNotes(liability.getNotes());
         response.setCreatedAt(liability.getCreatedAt());

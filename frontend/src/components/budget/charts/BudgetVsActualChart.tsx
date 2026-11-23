@@ -22,7 +22,13 @@ import type { ExpenseComparison } from '@/types/report';
  * simply longer than the budgeted one, and swapping its colour would make colour
  * mean two things at once and break the legend.
  */
-export default function BudgetVsActualChart({ expenses }: { expenses: ExpenseComparison[] }) {
+interface BudgetVsActualChartProps {
+  expenses: ExpenseComparison[];
+  /** The report's currency — every amount in it is already converted to this. */
+  currency: string;
+}
+
+export default function BudgetVsActualChart({ expenses, currency }: BudgetVsActualChartProps) {
   // A row budgeted at 0 and spent at 0 is two invisible bars and a wasted label.
   // Keep "budgeted 50, spent nothing" — that is real information.
   const rows = useMemo(
@@ -52,7 +58,7 @@ export default function BudgetVsActualChart({ expenses }: { expenses: ExpenseCom
           tickFormatter={
             // wrapped, not passed directly: recharts calls tickFormatter(value, index),
             // and that index would land on formatAxisCurrency's currency parameter
-            (value: number) => formatAxisCurrency(value)
+            (value: number) => formatAxisCurrency(value, currency)
           }
           tick={{ fill: '#94a3b8', fontSize: 11 }}
           axisLine={false}
@@ -70,7 +76,7 @@ export default function BudgetVsActualChart({ expenses }: { expenses: ExpenseCom
           formatter={
             // params left un-annotated so they infer from recharts' own Formatter type,
             // which widens value to string | number | array | undefined
-            (value, name) => [formatCurrency(Number(value ?? 0)), String(name)]
+            (value, name) => [formatCurrency(Number(value ?? 0), currency), String(name)]
           }
           cursor={{ fill: '#f8fafc' }}
           contentStyle={{

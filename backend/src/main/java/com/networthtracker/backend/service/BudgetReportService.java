@@ -2,7 +2,6 @@ package com.networthtracker.backend.service;
 
 import com.networthtracker.backend.dto.BudgetReportResponse;
 import com.networthtracker.backend.dto.ExpenseComparison;
-import com.networthtracker.backend.dto.MonthTypeTotal;
 import com.networthtracker.backend.dto.MonthlyNet;
 import com.networthtracker.backend.entity.BudgetEntry;
 import com.networthtracker.backend.entity.Category;
@@ -11,6 +10,7 @@ import com.networthtracker.backend.entity.User;
 import com.networthtracker.backend.repository.BudgetEntryRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -20,13 +20,18 @@ import java.util.Map;
 
 // assembles the budget dashboard payload:
 // the selected month's expenses, plus a continuous net line across all months.
+// every amount is in the user's preferred currency, converted at the latest rates —
+// for past months too, so the whole dashboard reads at one set of rates.
 @Service
 public class BudgetReportService {
 
     private final BudgetEntryRepository budgetEntryRepository;
+    private final CurrencyConverter currencyConverter;
 
-    public BudgetReportService(BudgetEntryRepository budgetEntryRepository) {
+    public BudgetReportService(BudgetEntryRepository budgetEntryRepository,
+                               CurrencyConverter currencyConverter) {
         this.budgetEntryRepository = budgetEntryRepository;
+        this.currencyConverter = currencyConverter;
     }
 
     public BudgetReportResponse buildReport(User user, LocalDate month) {
@@ -34,14 +39,16 @@ public class BudgetReportService {
         LocalDate firstOfMonth = month.withDayOfMonth(1);
 
         BudgetReportResponse response = new BudgetReportResponse();
+        String target = user.getPreferredCurrency();
         response.setMonth(firstOfMonth);
-        response.setExpenses(expensesFor(user, firstOfMonth));
-        response.setNetMoney(netMoneyFor(user));
+        response.setCurrency(target);
+        response.setExpenses(expensesFor(user, firstOfMonth, target));
+        response.setNetMoney(netMoneyFor(user, target));
         return response;
     }
 
     // the selected month's expense rows, in the category order the UI expects
-    private List<ExpenseComparison> expensesFor(User user, LocalDate month) {
+    private List<ExpenseComparison> expensesFor(User user, LocalDate month, String target) {
         List<BudgetEntry> entries = budgetEntryRepository.findByUserAndMonth(user, month);
 
         List<BudgetEntry> expenseEntries = new ArrayList<>();
@@ -58,36 +65,49 @@ public class BudgetReportService {
         List<ExpenseComparison> expenses = new ArrayList<>();
         for (BudgetEntry entry : expenseEntries) {
             Category category = entry.getCategory();
+            // one row per category per month, so each figure is final: convert and round it
             expenses.add(new ExpenseComparison(
                     category.getId(),
                     category.getName(),
-                    entry.getBudgetedAmount(),
-                    entry.getActualAmount()));
+                    currencyConverter.convertAndRound(entry.getBudgetedAmount(), entry.getCurrency(), target),
+                    currencyConverter.convertAndRound(entry.getActualAmount(), entry.getCurrency(), target)));
         }
         return expenses;
     }
 
     // one point per month from the user's earliest to their latest, gaps filled with zeros
-    private List<MonthlyNet> netMoneyFor(User user) {
-        List<MonthTypeTotal> totals = budgetEntryRepository.sumActualByMonthAndType(user);
-        if (totals.isEmpty()) {
+    private List<MonthlyNet> netMoneyFor(User user, String target) {
+        List<BudgetEntry> entries = budgetEntryRepository.findByUserWithCategoryOrderByMonth(user);
+        if (entries.isEmpty()) {
             return new ArrayList<>(); // no data at all — nothing to plot
         }
 
-        // fold the two rows per month (income, expense) into one point each
+        // convert every row's actual before adding it to its month's income or expenses;
+        // the sums stay unrounded until each month is complete
         Map<LocalDate, MonthlyNet> byMonth = new HashMap<>();
-        for (MonthTypeTotal total : totals) {
-            MonthlyNet point = byMonth.computeIfAbsent(total.getMonth(), MonthlyNet::new);
-            if (total.getType() == CategoryType.INCOME) {
-                point.setIncome(total.getTotal());
+        for (BudgetEntry entry : entries) {
+            MonthlyNet point = byMonth.computeIfAbsent(entry.getMonth(), MonthlyNet::new);
+            BigDecimal actual = currencyConverter.convert(entry.getActualAmount(), entry.getCurrency(), target);
+            if (entry.getCategory().getType() == CategoryType.INCOME) {
+                point.setIncome(point.getIncome().add(actual));
             } else {
-                point.setExpenses(total.getTotal());
+                point.setExpenses(point.getExpenses().add(actual));
             }
         }
 
+        // round each month once, now that its sums are final — net from the unrounded
+        // sums too, so it never drifts a cent from income minus expenses as converted
+        for (MonthlyNet point : byMonth.values()) {
+            BigDecimal income = point.getIncome();
+            BigDecimal expenses = point.getExpenses();
+            point.setIncome(currencyConverter.round(income, target));
+            point.setExpenses(currencyConverter.round(expenses, target));
+            point.setNet(currencyConverter.round(income.subtract(expenses), target));
+        }
+
         // the query is ordered by month, so the ends of the list are the ends of the range
-        LocalDate earliest = totals.get(0).getMonth();
-        LocalDate latest = totals.get(totals.size() - 1).getMonth();
+        LocalDate earliest = entries.get(0).getMonth();
+        LocalDate latest = entries.get(entries.size() - 1).getMonth();
 
         // walk month by month so the line has no invisible jumps. a month with no rows
         // becomes a fresh MonthlyNet, which is already zero income and zero expenses.

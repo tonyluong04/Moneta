@@ -7,7 +7,7 @@ import java.util.List;
 // total per asset category card. amounts only — the rings compute their own percentage.
 public class PortfolioSummaryResponse {
 
-    // face-value sums labelled with the user's preferred currency; no conversion until 7.2
+    // the user's preferred currency: every row is converted into it before summing
     private String currency;
 
     private BigDecimal totalAssets;

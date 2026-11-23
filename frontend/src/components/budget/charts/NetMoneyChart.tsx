@@ -17,6 +17,8 @@ import type { MonthlyNet } from '@/types/report';
 
 interface NetMoneyChartProps {
   netMoney: MonthlyNet[];
+  /** The report's currency — every amount in it is already converted to this. */
+  currency: string;
   /** The dashboard's selected month ("2026-09-01"), marked on the line as a "you are here". */
   selectedMonth?: string;
 }
@@ -24,13 +26,14 @@ interface NetMoneyChartProps {
 interface NetTooltipProps {
   active?: boolean;
   payload?: Array<{ payload: MonthlyNet }>;
+  currency: string;
 }
 
 /**
  * All three numbers, not just the net. A net of A$1,560 is far more useful once
  * you can see it came from A$2,000 in and A$440 out.
  */
-function NetTooltip({ active, payload }: NetTooltipProps) {
+function NetTooltip({ active, payload, currency }: NetTooltipProps) {
   const point = payload?.[0]?.payload;
   if (!active || !point) return null;
 
@@ -42,16 +45,16 @@ function NetTooltip({ active, payload }: NetTooltipProps) {
       <dl className="mt-1.5 space-y-0.5 tabular-nums">
         <div className="flex justify-between gap-6">
           <dt className="text-gray-500">Income</dt>
-          <dd className="text-gray-800">{formatCurrency(point.income)}</dd>
+          <dd className="text-gray-800">{formatCurrency(point.income, currency)}</dd>
         </div>
         <div className="flex justify-between gap-6">
           <dt className="text-gray-500">Expenses</dt>
-          <dd className="text-gray-800">{formatCurrency(point.expenses)}</dd>
+          <dd className="text-gray-800">{formatCurrency(point.expenses, currency)}</dd>
         </div>
         <div className="flex justify-between gap-6 border-t border-gray-100 pt-1 mt-1">
           <dt className="text-gray-500">{saved ? 'Saved' : 'Lost'}</dt>
           <dd className={saved ? 'font-medium text-teal-700' : 'font-medium text-red-600'}>
-            {formatCurrency(Math.abs(point.net))}
+            {formatCurrency(Math.abs(point.net), currency)}
           </dd>
         </div>
       </dl>
@@ -69,7 +72,7 @@ function NetTooltip({ active, payload }: NetTooltipProps) {
  * green/red line: those are reserved status colours, and "below the line" is
  * already unmistakable without relying on hue.
  */
-export default function NetMoneyChart({ netMoney, selectedMonth }: NetMoneyChartProps) {
+export default function NetMoneyChart({ netMoney, currency, selectedMonth }: NetMoneyChartProps) {
   /**
    * Drop trailing months where nothing has been recorded yet. A month in progress
    * has a full plan but zero actuals, so plotting it literally draws a cliff to
@@ -119,13 +122,13 @@ export default function NetMoneyChart({ netMoney, selectedMonth }: NetMoneyChart
             tickFormatter={
               // wrapped because recharts passes (value, index), and that index
               // would land on formatAxisCurrency's currency parameter
-              (value: number) => formatAxisCurrency(value)
+              (value: number) => formatAxisCurrency(value, currency)
             }
             tick={{ fill: '#94a3b8', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip content={<NetTooltip />} />
+          <Tooltip content={<NetTooltip currency={currency} />} />
 
           {/* zero is the whole point of this chart: above it saved, below it lost */}
           <ReferenceLine y={0} stroke="#cbd5e1" strokeDasharray="4 4" />

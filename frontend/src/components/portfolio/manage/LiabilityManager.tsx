@@ -271,8 +271,13 @@ export default function LiabilityManager({ currency, onChanged }: LiabilityManag
               key={liability.id}
               name={liability.name}
               detail={liability.category.name + describeRate(liability.interestRate)}
-              amount={formatCurrency(-liability.balance, liability.currency)}
-              negative={liability.balance > 0}
+              amount={formatCurrency(-liability.displayBalance, liability.displayCurrency)}
+              nativeAmount={
+                liability.currency !== liability.displayCurrency
+                  ? formatCurrency(-liability.balance, liability.currency)
+                  : undefined
+              }
+              negative={liability.displayBalance > 0}
               isBeingEdited={editing?.id === liability.id}
               onEdit={() => startEdit(liability)}
               onDelete={() => setPendingDelete(liability)}

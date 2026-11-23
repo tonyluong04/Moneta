@@ -20,25 +20,28 @@ public class AssetService {
 
     private final AssetRepository assetRepository;
     private final AssetCategoryRepository assetCategoryRepository;
+    private final CurrencyConverter currencyConverter;
 
     public AssetService(AssetRepository assetRepository,
-                        AssetCategoryRepository assetCategoryRepository) {
+                        AssetCategoryRepository assetCategoryRepository,
+                        CurrencyConverter currencyConverter) {
         this.assetRepository = assetRepository;
         this.assetCategoryRepository = assetCategoryRepository;
+        this.currencyConverter = currencyConverter;
     }
 
     /** Every asset the user owns, in card order — ordered by the query, not here. */
     public List<AssetResponse> findAll(User user) {
         List<AssetResponse> responses = new ArrayList<>();
         for (Asset asset : assetRepository.findByUserOrdered(user)) {
-            responses.add(toResponse(asset));
+            responses.add(toResponse(asset, user));
         }
         return responses;
     }
 
     /** One asset, by id — only if it belongs to this user. */
     public AssetResponse findOne(User user, Integer id) {
-        return toResponse(requireOwn(user, id));
+        return toResponse(requireOwn(user, id), user);
     }
 
     @Transactional
@@ -52,7 +55,7 @@ public class AssetService {
         asset.setNotes(request.getNotes());
 
         asset = assetRepository.save(asset);
-        return toResponse(asset);
+        return toResponse(asset, user);
     }
 
     /** Partial update: only the fields actually sent are applied. */
@@ -77,7 +80,7 @@ public class AssetService {
         }
 
         asset = assetRepository.save(asset);
-        return toResponse(asset);
+        return toResponse(asset, user);
     }
 
     @Transactional
@@ -103,7 +106,12 @@ public class AssetService {
                 .orElseThrow(() -> new IllegalArgumentException("Asset not found"));
     }
 
-    private AssetResponse toResponse(Asset asset) {
+    /**
+     * The native value and currency go out untouched; displayValue is the same
+     * worth in the user's preferred currency, rounded once (PRD §4.5.3).
+     */
+    private AssetResponse toResponse(Asset asset, User user) {
+        String target = user.getPreferredCurrency();
         AssetCategory category = asset.getCategory();
 
         AssetCategorySummary categorySummary = new AssetCategorySummary();
@@ -118,6 +126,9 @@ public class AssetService {
         response.setManualValue(asset.getManualValue());
         // the Phase 5 seam: ask the entity what it is worth, never read manualValue here
         response.setValue(asset.getValue());
+        response.setDisplayValue(currencyConverter.convertAndRound(
+                asset.getValue(), asset.getCurrency(), target));
+        response.setDisplayCurrency(target);
         response.setNotes(asset.getNotes());
         response.setCreatedAt(asset.getCreatedAt());
         response.setUpdatedAt(asset.getUpdatedAt());
